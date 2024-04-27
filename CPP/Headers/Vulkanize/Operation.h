@@ -21,8 +21,6 @@ namespace VKZ
     virtual ~Operation();
 
     //----- Event Callbacks ----------------------------------------------------
-    virtual bool on_event( std::string event ) { return true; }
-
     virtual bool activate() { return true; }
     // Return true on success, false on failure.
 
@@ -35,8 +33,12 @@ namespace VKZ
     virtual void deactivate() {}
     // Called from deactivate() if on_configure() returned true.
 
+    virtual bool on_custom_event( const char* name ) { return true; }
+
+    virtual void on_surface_lost() {}
+
     //----- Event Handling Framework -------------------------------------------
-    virtual bool handle_event( std::string event, bool reverse_order=false );
+    virtual bool handle_event( Event event );
 
     virtual void set_context( Context* context ) = 0;
   };

@@ -36,12 +36,8 @@ void ConfigureSwapchain::deactivate()
   if ( !reconfiguring ) vkb::destroy_swapchain( context->swapchain );
 }
 
-bool ConfigureSwapchain::on_event( std::string event_type )
+void ConfigureSwapchain::on_surface_lost()
 {
-  if (event_type == "surface_lost")
-  {
-    if (active) reconfiguring = true;
-  }
-  return true;
+  if (active) reconfiguring = true;
 }
 

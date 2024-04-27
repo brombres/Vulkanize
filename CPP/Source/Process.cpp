@@ -34,7 +34,7 @@ void Process::add_operation( string phase, Operation* operation )
 
 bool Process::activate( string phase )
 {
-  if ( !dispatch_event(phase, "activate") ) return false;
+  if ( !dispatch_event(phase, Event(EventType::ACTIVATE)) ) return false;
   return true;
 }
 
@@ -53,7 +53,7 @@ void Process::configure_operations()
 
 void Process::deactivate( string phase )
 {
-  dispatch_event( phase, "deactivate", true );
+  dispatch_event( phase, Event(EventType::DEACTIVATE,true) );
 }
 
 void Process::destroy()
@@ -62,9 +62,9 @@ void Process::destroy()
   configured = false;
 }
 
-bool Process::dispatch_event( string phase, string event, bool reverse_order )
+bool Process::dispatch_event( string phase, Event event )
 {
-  if (reverse_order)
+  if (event.reverse_order)
   {
     for (int i=(int)phases.size(); --i>=0; )
     {
@@ -72,7 +72,7 @@ bool Process::dispatch_event( string phase, string event, bool reverse_order )
       if (_phase_begins_with(cur_phase,phase))
       {
         Operation* operation = operations[ cur_phase ];
-        if (operation && !operation->handle_event(event,true)) return false;
+        if (operation && !operation->handle_event(event)) return false;
       }
     }
     return true;
@@ -84,7 +84,7 @@ bool Process::dispatch_event( string phase, string event, bool reverse_order )
       if (_phase_begins_with(cur_phase,phase))
       {
         Operation* operation = operations[ cur_phase ];
-        if (operation && !operation->handle_event(event,false)) return false;
+        if (operation && !operation->handle_event(event)) return false;
       }
     }
     return true;
@@ -93,7 +93,7 @@ bool Process::dispatch_event( string phase, string event, bool reverse_order )
 
 bool Process::execute( string phase )
 {
-  return dispatch_event( phase, "execute" );
+  return dispatch_event( phase, Event(EventType::EXECUTE) );
 }
 
 void Process::set_operation( string phase, Operation* operation )

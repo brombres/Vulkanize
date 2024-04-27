@@ -5,6 +5,7 @@
 #include <vulkan/vulkan.h>
 #include "VkBootstrap.h"
 #include "Vulkanize/Types.h"
+#include "Vulkanize/Event.h"
 #include "Vulkanize/Process.h"
 
 #if !defined(VKZ_USE_GLSLANG)

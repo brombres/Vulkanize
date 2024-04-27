@@ -13,9 +13,9 @@ Operation::~Operation()
   }
 }
 
-bool Operation::handle_event( string event, bool reverse_order )
+bool Operation::handle_event( Event event )
 {
-  if (reverse_order)
+  if (event.reverse_order)
   {
     if (next_sibling && !next_sibling->handle_event(event)) return false;
     if (first_child && !first_child->handle_event(event)) return false;
@@ -26,7 +26,7 @@ bool Operation::handle_event( string event, bool reverse_order )
     configure();
   }
 
-  if (event == "deactivate")
+  if (event.type == EventType::DEACTIVATE)
   {
     if (active || progress)
     {
@@ -35,27 +35,28 @@ bool Operation::handle_event( string event, bool reverse_order )
       progress = 0;
     }
   }
-  else
+  else if (event.type == EventType::ACTIVATE)
   {
-    if (event == "activate")
+    if ( !active )
     {
-      if ( !active )
-      {
-        if ( !activate() ) return false;
-        active = true;
-      }
-    }
-    else if (event == "execute")
-    {
-      if ( !execute() ) return false;
-    }
-    else
-    {
-      if ( !on_event(event) ) return false;
+      if ( !activate() ) return false;
+      active = true;
     }
   }
+  else if (event.type == EventType::EXECUTE)
+  {
+    if ( !execute() ) return false;
+  }
+  else if (event.type == EventType::SURFACE_LOST)
+  {
+    on_surface_lost();
+  }
+  else
+  {
+    if ( !on_custom_event(event.name) ) return false;
+  }
 
-  if ( !reverse_order )
+  if ( !event.reverse_order )
   {
     if (first_child && !first_child->handle_event(event)) return false;
     if (next_sibling && !next_sibling->handle_event(event)) return false;

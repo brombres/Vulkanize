@@ -10,6 +10,6 @@ namespace VKZ
 
     virtual bool activate();
     virtual void deactivate();
-    virtual bool on_event( std::string event_type );
+    virtual void on_surface_lost();
   };
 };

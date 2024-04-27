@@ -99,7 +99,7 @@ int Context::find_memory_type( uint32_t typeFilter, VkMemoryPropertyFlags proper
 void Context::recreate_swapchain()
 {
   device_dispatch.deviceWaitIdle();
-  dispatch_event( "configure.swapchain", "surface_lost", true );
+  dispatch_event( "configure.swapchain", Event(EventType::SURFACE_LOST,true) );
   deactivate( "configure.swapchain" );
   activate( "configure.swapchain" );
 }

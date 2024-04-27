@@ -31,7 +31,7 @@ namespace VKZ
 
     virtual void deactivate( const std::string phase );
     virtual void destroy();
-    virtual bool dispatch_event( std::string phase, std::string event, bool reverse_order=false );
+    virtual bool dispatch_event( std::string phase, Event event );
     virtual bool execute( std::string phase );
     virtual void set_operation( std::string phase, Operation* operation );
 
