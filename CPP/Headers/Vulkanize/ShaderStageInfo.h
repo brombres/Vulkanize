@@ -16,6 +16,7 @@ namespace VKZ
     VkShaderStageFlagBits stage;
     VkShaderModule        module;
     std::string           main_function_name;
+    std::string           shader_filename;
     std::string           shader_source;
     std::string           spirv_bytecode;
     int                   state;
@@ -26,8 +27,10 @@ namespace VKZ
       state = MODULE;
     }
 
-    ShaderStageInfo( VkShaderStageFlagBits stage, std::string shader_source, const char* main_function_name="main" )
-      : stage(stage), shader_source(shader_source), main_function_name(main_function_name)
+    ShaderStageInfo( VkShaderStageFlagBits stage, std::string shader_filename,
+        std::string shader_source, const char* main_function_name="main" )
+      : stage(stage), shader_filename(shader_filename), shader_source(shader_source),
+        main_function_name(main_function_name)
     {
       state = SOURCE;
     }

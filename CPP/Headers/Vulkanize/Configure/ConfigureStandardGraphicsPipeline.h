@@ -9,7 +9,6 @@ namespace VKZ
   {
     ConfigureStandardGraphicsPipeline();
 
-    virtual bool activate();
-    virtual void deactivate();
+    virtual void configure();
   };
 };

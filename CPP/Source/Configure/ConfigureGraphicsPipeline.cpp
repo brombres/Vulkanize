@@ -1,5 +1,6 @@
 #include "VkBootstrap.h"
 #include "Vulkanize/Vulkanize.h"
+using namespace std;
 using namespace VKZ;
 
 ConfigureGraphicsPipeline::~ConfigureGraphicsPipeline()
@@ -27,7 +28,7 @@ bool ConfigureGraphicsPipeline::activate()
     "#extension GL_ARB_separate_shader_objects : enable\n"
     "\n"
     "layout (location = 0) in vec2 position;\n"
-    "layout (location = 1) in vec3 color;\n"
+    "layout (location = 2) in vec3 color;\n"
     "\n"
     "layout (location = 0) out vec3 fragColor;\n"
     "\n"
@@ -73,10 +74,30 @@ bool ConfigureGraphicsPipeline::activate()
   VkPipelineShaderStageCreateInfo shader_stages[] =
       { vertex_stage_info, fragment_stage_info };
 
+  vector<VkVertexInputBindingDescription>   binding_descriptions;
+  vector<VkVertexInputAttributeDescription> attribute_descriptions;
+  uint32_t binding = 0;
+  for (auto vertex_description : vertex_descriptions)
+  {
+    vertex_description->collect_binding_description( binding_descriptions );
+    binding_descriptions.back().binding = binding;
+
+    uint32_t i = attribute_descriptions.size();
+    vertex_description->collect_attribute_descriptions( attribute_descriptions );
+    for (; i<attribute_descriptions.size(); ++i)
+    {
+      attribute_descriptions[i].binding = binding;
+    }
+
+    ++binding;
+  }
+
   VkPipelineVertexInputStateCreateInfo vertex_input_info = {};
   vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  vertex_input_info.vertexBindingDescriptionCount = 0;
-  vertex_input_info.vertexAttributeDescriptionCount = 0;
+  vertex_input_info.vertexBindingDescriptionCount = binding_descriptions.size();
+  vertex_input_info.vertexAttributeDescriptionCount = attribute_descriptions.size();
+  vertex_input_info.pVertexBindingDescriptions = binding_descriptions.data();
+  vertex_input_info.pVertexAttributeDescriptions = attribute_descriptions.data();
 
   VkPipelineInputAssemblyStateCreateInfo input_assembly = {};
   input_assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -147,7 +168,7 @@ bool ConfigureGraphicsPipeline::activate()
   );
   progress = 1;
 
-  std::vector<VkDynamicState> dynamic_states =
+  vector<VkDynamicState> dynamic_states =
   {
     VK_DYNAMIC_STATE_VIEWPORT,
     VK_DYNAMIC_STATE_SCISSOR,
@@ -192,15 +213,13 @@ void ConfigureGraphicsPipeline::add_shader_stage( VkShaderStageFlagBits stage, V
     const char* main_function_name )
 {
   ShaderStageInfo* stage_info = new ShaderStageInfo( stage, module, main_function_name );
-  stage_info->context = context;
   shader_stages.push_back( stage_info );
 }
 
-void ConfigureGraphicsPipeline::add_shader_stage( VkShaderStageFlagBits stage, std::string& shader_source,
-    const char* main_function_name )
+void ConfigureGraphicsPipeline::add_shader_stage( VkShaderStageFlagBits stage,
+    string shader_filename, string shader_source, const char* main_function_name )
 {
   ShaderStageInfo* stage_info = new ShaderStageInfo( stage, shader_source, main_function_name );
-  stage_info->context = context;
   shader_stages.push_back( stage_info );
 }
 
@@ -208,7 +227,6 @@ void ConfigureGraphicsPipeline::add_shader_stage( VkShaderStageFlagBits stage, c
     size_t spirv_byte_count, const char* main_function_name )
 {
   ShaderStageInfo* stage_info = new ShaderStageInfo( stage, spirv_bytes, spirv_byte_count, main_function_name );
-  stage_info->context = context;
   shader_stages.push_back( stage_info );
 }
 
@@ -221,15 +239,6 @@ void ConfigureGraphicsPipeline::deactivate()
 {
   if (progress >= 2) context->device_dispatch.destroyPipeline( context->graphics_pipeline, nullptr );
   if (progress >= 1) context->device_dispatch.destroyPipelineLayout( context->pipeline_layout, nullptr );
-}
-
-void ConfigureGraphicsPipeline::set_context( Context* context )
-{
-  ContextOperation<Context>::set_context( context );
-  for (auto stage : shader_stages)
-  {
-    stage->context = context;
-  }
 }
 
 VkShaderModule ConfigureGraphicsPipeline::_create_shader_module( const Byte* code, int count )
