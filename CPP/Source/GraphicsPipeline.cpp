@@ -2,6 +2,17 @@
 using namespace std;
 using namespace VKZ;
 
+void GraphicsPipeline::cmd_bind( VkCommandBuffer cmd )
+{
+  context->device_dispatch.cmdBindPipeline( cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline );
+}
+
+void GraphicsPipeline::cmd_set_viewports_and_scissor_rects( VkCommandBuffer cmd )
+{
+  context->device_dispatch.cmdSetViewport( cmd, 0, viewports.size(), viewports.data() );
+  context->device_dispatch.cmdSetScissor(  cmd, 0, scissor_rects.size(), scissor_rects.data() );
+}
+
 void GraphicsPipeline::set_default_scissor_rect( int index )
 {
   set_scissor_rect( index, {}, context->surface_size );

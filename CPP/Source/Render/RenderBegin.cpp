@@ -62,25 +62,10 @@ bool RenderBegin::execute()
 
   context->device_dispatch.cmdBeginRenderPass( context->cmd, &render_pass_info, VK_SUBPASS_CONTENTS_INLINE );
 
-  context->device_dispatch.cmdBindPipeline(
-    context->cmd,
-    VK_PIPELINE_BIND_POINT_GRAPHICS,
-    context->standard_pipeline.pipeline
-  );
-
-  VkViewport viewport = {};
-  viewport.x = 0.0f;
-  viewport.y = 0.0f;
-  viewport.width = context->surface_size.width;
-  viewport.height = context->surface_size.height;
-  viewport.minDepth = 0.0f;
-  viewport.maxDepth = 1.0f;
-
-  VkRect2D scissor = {};
-  scissor.offset = { 0, 0 };
-  scissor.extent = context->surface_size;
-  context->device_dispatch.cmdSetViewport( context->cmd, 0, 1, &viewport );
-  context->device_dispatch.cmdSetScissor(  context->cmd, 0, 1, &scissor );
+  context->standard_pipeline.cmd_bind( context->cmd );
+  context->standard_pipeline.set_default_viewport( 0 );
+  context->standard_pipeline.set_default_scissor_rect( 0 );
+  context->standard_pipeline.cmd_set_viewports_and_scissor_rects( context->cmd );
 
   VkBuffer vertex_buffers[] = { context->vertex_buffer };
   VkDeviceSize offsets[] = {0};
