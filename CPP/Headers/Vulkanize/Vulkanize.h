@@ -71,23 +71,23 @@ namespace VKZ
   }                                                            \
 }
 
-#define VKZ_REPORT_ERROR(stage)                                   \
-  VKZ_LOG_ERROR( "[ERROR] Balefire Vulkan: error %s.\n", stage ); \
+#define VKZ_REPORT_ERROR(action)                                   \
+  VKZ_LOG_ERROR( "[ERROR] Balefire Vulkan: error %s.\n", action ); \
 
-#define VKZ_ON_ERROR(stage,cmd,on_error)                 \
+#define VKZ_ON_ERROR(action,cmd,on_error)                \
 	{                                                      \
 		auto err = cmd;                                      \
 		if (err)                                             \
 		{                                                    \
       VKZ_LOG_ERROR(                                     \
           "[ERROR] Balefire Vulkan: error %s (%s).\n",   \
-          stage, Vulkanize::vkResult_to_c_string(err)    \
+          action, Vulkanize::vkResult_to_c_string(err)   \
       );                                                 \
-      on_error;                                              \
+      on_error;                                          \
 		}                                                    \
 	}
 
-#define VKZ_REQUIRE(stage,cmd) VKZ_ON_ERROR(stage,cmd,return false;)
+#define VKZ_REQUIRE(action,cmd) VKZ_ON_ERROR(action,cmd,return false;)
 
 #include "Vulkanize/ShaderStageInfo.h"
 #include "Vulkanize/Image.h"

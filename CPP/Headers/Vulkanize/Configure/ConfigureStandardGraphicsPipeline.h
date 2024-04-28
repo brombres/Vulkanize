@@ -7,8 +7,6 @@ namespace VKZ
 {
   struct ConfigureStandardGraphicsPipeline : ConfigureGraphicsPipeline
   {
-    ConfigureStandardGraphicsPipeline();
-
     virtual void configure();
   };
 };

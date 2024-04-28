@@ -3,6 +3,20 @@
 using namespace std;
 using namespace VKZ;
 
+ConfigureGraphicsPipeline::ConfigureGraphicsPipeline()
+{
+  // Default dynamic states
+  dynamic_states.push_back( VK_DYNAMIC_STATE_VIEWPORT );
+  dynamic_states.push_back( VK_DYNAMIC_STATE_SCISSOR );
+  dynamic_states.push_back( VK_DYNAMIC_STATE_DEPTH_BIAS );
+
+  // Default color blend attachment
+  color_blend_attachment.colorWriteMask =
+      VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+      VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+  color_blend_attachment.blendEnable = VK_FALSE;
+}
+
 ConfigureGraphicsPipeline::~ConfigureGraphicsPipeline()
 {
   while (shader_stages.size())
@@ -20,75 +34,12 @@ ConfigureGraphicsPipeline::~ConfigureGraphicsPipeline()
 
 bool ConfigureGraphicsPipeline::activate()
 {
-  const char* vertex_shader_bytes;
-  size_t vertex_shader_size;
-  VkShaderModule vertex_module;
-  if (compile_shader(
-    VK_SHADER_STAGE_VERTEX_BIT,
-    "shader.vert",
-    "#version 450\n"
-    "#extension GL_ARB_separate_shader_objects : enable\n"
-    "\n"
-    "layout (location = 0) in vec2 position;\n"
-    "layout (location = 2) in vec3 color;\n"
-    "\n"
-    "layout (location = 0) out vec3 fragColor;\n"
-    "\n"
-    "void main ()\n"
-    "{\n"
-      "gl_Position = vec4 (position, 0.0, 1.0);\n"
-      "fragColor = color;\n"
-    "}\n",
-    &vertex_shader_bytes,
-    &vertex_shader_size
-  ))
+  vector<VkPipelineShaderStageCreateInfo> shader_create_info;
+  shader_create_info.resize( shader_stages.size() );
+  for (size_t i=0; i<shader_stages.size(); ++i)
   {
-    vertex_module = _create_shader_module( vertex_shader_bytes, vertex_shader_size );
-    delete vertex_shader_bytes;
-    if (vertex_module == VK_NULL_HANDLE) return false;
+    if ( !shader_stages[i]->get_create_info( shader_create_info[i] ) ) return false;
   }
-
-  const char* fragment_shader_bytes;
-  size_t fragment_shader_size;
-  VkShaderModule fragment_module;
-  if (compile_shader(
-    VK_SHADER_STAGE_FRAGMENT_BIT,
-    "shader.frag",
-    "#version 450\n"
-    "#extension GL_ARB_separate_shader_objects : enable\n"
-    "\n"
-    "layout (location = 0) in vec3 fragColor;\n"
-    "\n"
-    "layout (location = 0) out vec4 outColor;\n"
-    "\n"
-    "void main () { outColor = vec4 (fragColor, 1.0); }\n",
-    &fragment_shader_bytes,
-    &fragment_shader_size
-  ))
-  {
-    fragment_module = _create_shader_module( fragment_shader_bytes, fragment_shader_size );
-    delete fragment_shader_bytes;
-    if (fragment_module == VK_NULL_HANDLE)
-    {
-      context->device_dispatch.destroyShaderModule( vertex_module, nullptr );
-      return false;
-    }
-  }
-
-  VkPipelineShaderStageCreateInfo vertex_stage_info = {};
-  vertex_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  vertex_stage_info.stage = VK_SHADER_STAGE_VERTEX_BIT;
-  vertex_stage_info.module = vertex_module;
-  vertex_stage_info.pName = "main";
-
-  VkPipelineShaderStageCreateInfo fragment_stage_info = {};
-  fragment_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  fragment_stage_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-  fragment_stage_info.module = fragment_module;
-  fragment_stage_info.pName = "main";
-
-  VkPipelineShaderStageCreateInfo shader_stages[] =
-      { vertex_stage_info, fragment_stage_info };
 
   vector<VkVertexInputBindingDescription>   binding_descriptions;
   vector<VkVertexInputAttributeDescription> attribute_descriptions;
@@ -117,48 +68,12 @@ bool ConfigureGraphicsPipeline::activate()
 
   VkPipelineInputAssemblyStateCreateInfo input_assembly = {};
   input_assembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-  input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-  input_assembly.primitiveRestartEnable = VK_FALSE;
+  input_assembly.topology = topology;
+  input_assembly.primitiveRestartEnable = enable_primitive_restart;
 
-  VkViewport viewport = {};
-  viewport.x = 0.0f;
-  viewport.y = 0.0f;
-  viewport.width  = context->surface_size.width;
-  viewport.height = context->surface_size.height;
-  viewport.minDepth = 0.0f;
-  viewport.maxDepth = 1.0f;
-
-  VkRect2D scissor = {};
-  scissor.offset = { 0, 0 };
-  scissor.extent = context->surface_size;
-
-  VkPipelineViewportStateCreateInfo viewport_state = {};
-  viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-  viewport_state.viewportCount = 1;
-  viewport_state.pViewports = &viewport;
-  viewport_state.scissorCount = 1;
-  viewport_state.pScissors = &scissor;
-
-  VkPipelineRasterizationStateCreateInfo rasterizer = {};
-  rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-  rasterizer.depthClampEnable = VK_FALSE;
-  rasterizer.rasterizerDiscardEnable = VK_FALSE;
-  rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-  rasterizer.lineWidth = 1.0f;
-  rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-  rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
-  rasterizer.depthBiasEnable = VK_FALSE;
-
-  VkPipelineMultisampleStateCreateInfo multisampling = {};
-  multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-  multisampling.sampleShadingEnable = VK_FALSE;
-  multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-  VkPipelineColorBlendAttachmentState color_blend_attachment = {};
-  color_blend_attachment.colorWriteMask =
-      VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-      VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-  color_blend_attachment.blendEnable = VK_FALSE;
+  VkPipelineViewportStateCreateInfo viewport_state = get_viewport_config();
+  VkPipelineRasterizationStateCreateInfo rasterizer = get_rasterizer_config();
+  VkPipelineMultisampleStateCreateInfo multisampling = get_multisampling_config();
 
   VkPipelineColorBlendStateCreateInfo color_blending = {};
   color_blending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -184,13 +99,6 @@ bool ConfigureGraphicsPipeline::activate()
   );
   progress = 1;
 
-  vector<VkDynamicState> dynamic_states =
-  {
-    VK_DYNAMIC_STATE_VIEWPORT,
-    VK_DYNAMIC_STATE_SCISSOR,
-    VK_DYNAMIC_STATE_DEPTH_BIAS
-  };
-
   VkPipelineDynamicStateCreateInfo dynamic_info = {};
   dynamic_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
   dynamic_info.dynamicStateCount = static_cast<uint32_t>(dynamic_states.size());
@@ -198,8 +106,8 @@ bool ConfigureGraphicsPipeline::activate()
 
   VkGraphicsPipelineCreateInfo pipeline_info = {};
   pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-  pipeline_info.stageCount = 2;
-  pipeline_info.pStages = shader_stages;
+  pipeline_info.stageCount = shader_create_info.size();
+  pipeline_info.pStages = shader_create_info.data();
   pipeline_info.pVertexInputState = &vertex_input_info;
   pipeline_info.pInputAssemblyState = &input_assembly;
   pipeline_info.pViewportState = &viewport_state;
@@ -220,22 +128,22 @@ bool ConfigureGraphicsPipeline::activate()
   );
   progress = 2;
 
-  context->device_dispatch.destroyShaderModule( fragment_module, nullptr );
-  context->device_dispatch.destroyShaderModule( vertex_module, nullptr );
+  for (auto shader_stage : shader_stages) shader_stage->destroy_module();
   return true;
 }
 
 void ConfigureGraphicsPipeline::add_shader_stage( VkShaderStageFlagBits stage,
     string shader_filename, string shader_source, const char* main_function_name )
 {
-  ShaderStageInfo* stage_info = new ShaderStageInfo( context, stage, shader_source, main_function_name );
+  ShaderStageInfo* stage_info = new ShaderStageInfo( context, stage, shader_filename, shader_source, main_function_name );
   shader_stages.push_back( stage_info );
 }
 
-void ConfigureGraphicsPipeline::add_shader_stage( VkShaderStageFlagBits stage, const char* spirv_bytes,
-    size_t spirv_byte_count, const char* main_function_name )
+void ConfigureGraphicsPipeline::add_shader_stage( VkShaderStageFlagBits stage, string shader_filename,
+    const char* spirv_bytes, size_t spirv_byte_count, const char* main_function_name )
 {
-  ShaderStageInfo* stage_info = new ShaderStageInfo( context, stage, spirv_bytes, spirv_byte_count, main_function_name );
+  ShaderStageInfo* stage_info = new ShaderStageInfo( context, stage, shader_filename, spirv_bytes,
+      spirv_byte_count, main_function_name );
   shader_stages.push_back( stage_info );
 }
 
@@ -248,22 +156,59 @@ void ConfigureGraphicsPipeline::deactivate()
 {
   if (progress >= 2) context->device_dispatch.destroyPipeline( context->graphics_pipeline, nullptr );
   if (progress >= 1) context->device_dispatch.destroyPipelineLayout( context->pipeline_layout, nullptr );
+
+  for (auto shader_stage : shader_stages)
+  {
+    shader_stage->destroy_module();
+  }
 }
 
-VkShaderModule ConfigureGraphicsPipeline::_create_shader_module( const char* code, uint32_t size )
+VkPipelineMultisampleStateCreateInfo ConfigureGraphicsPipeline::get_multisampling_config()
 {
-  VkShaderModuleCreateInfo create_info = {};
-  create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-  create_info.codeSize = size;
-  create_info.pCode = (const uint32_t*)code;
+  VkPipelineMultisampleStateCreateInfo multisampling = {};
+  multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+  multisampling.sampleShadingEnable = VK_FALSE;
+  multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-  VkShaderModule shader_module;
-  VKZ_ON_ERROR(
-    "creating shader module",
-    context->device_dispatch.createShaderModule( &create_info, nullptr, &shader_module ),
-    return VK_NULL_HANDLE;
-  );
+  return multisampling;
+}
 
-  return shader_module;
+VkPipelineRasterizationStateCreateInfo ConfigureGraphicsPipeline::get_rasterizer_config()
+{
+  VkPipelineRasterizationStateCreateInfo rasterizer = {};
+  rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+  rasterizer.depthClampEnable = VK_FALSE;
+  rasterizer.rasterizerDiscardEnable = VK_FALSE;
+  rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+  rasterizer.lineWidth = 1.0f;
+  rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+  rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+  rasterizer.depthBiasEnable = VK_FALSE;
+
+  return rasterizer;
+}
+
+VkPipelineViewportStateCreateInfo ConfigureGraphicsPipeline::get_viewport_config()
+{
+  VkViewport viewport = {};
+  viewport.x = 0.0f;
+  viewport.y = 0.0f;
+  viewport.width  = context->surface_size.width;
+  viewport.height = context->surface_size.height;
+  viewport.minDepth = 0.0f;
+  viewport.maxDepth = 1.0f;
+
+  VkRect2D scissor = {};
+  scissor.offset = { 0, 0 };
+  scissor.extent = context->surface_size;
+
+  VkPipelineViewportStateCreateInfo viewport_state = {};
+  viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+  viewport_state.viewportCount = 1;
+  viewport_state.pViewports = &viewport;
+  viewport_state.scissorCount = 1;
+  viewport_state.pScissors = &scissor;
+
+  return viewport_state;
 }
 
