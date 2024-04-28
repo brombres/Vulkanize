@@ -16,6 +16,10 @@ namespace VKZ
 
     VkPrimitiveTopology                 topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     VkBool32                            enable_primitive_restart = VK_FALSE;
+
+    std::vector<VkViewport> viewports;
+    std::vector<VkRect2D>   scissor_rects;
+
     VkPipelineColorBlendAttachmentState color_blend_attachment = {};
 
     ConfigureGraphicsPipeline();
@@ -30,9 +34,11 @@ namespace VKZ
     virtual void add_vertex_description( VertexDescription* vertex_description );
     virtual void deactivate();
 
-    virtual VkPipelineMultisampleStateCreateInfo   get_multisampling_config();
-    virtual VkPipelineRasterizationStateCreateInfo get_rasterizer_config();
-    virtual VkPipelineViewportStateCreateInfo      get_viewport_config();
-
+    virtual void configure_color_blend_info( VkPipelineColorBlendStateCreateInfo& color_blend_info );
+    virtual void configure_multisampling_info( VkPipelineMultisampleStateCreateInfo& multisampling_info );
+    virtual void configure_pipeline_info( VkGraphicsPipelineCreateInfo& pipeline_info );
+    virtual void configure_pipeline_layout_info( VkPipelineLayoutCreateInfo& pipeline_layout_info );
+    virtual void configure_rasterizer_info( VkPipelineRasterizationStateCreateInfo& rasterizer_info );
+    virtual void configure_viewport_info( VkPipelineViewportStateCreateInfo& viewport_state );
   };
 };

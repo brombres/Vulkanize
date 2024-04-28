@@ -71,25 +71,20 @@ bool ConfigureGraphicsPipeline::activate()
   input_assembly.topology = topology;
   input_assembly.primitiveRestartEnable = enable_primitive_restart;
 
-  VkPipelineViewportStateCreateInfo viewport_state = get_viewport_config();
-  VkPipelineRasterizationStateCreateInfo rasterizer = get_rasterizer_config();
-  VkPipelineMultisampleStateCreateInfo multisampling = get_multisampling_config();
+  VkPipelineViewportStateCreateInfo viewport_info = {};
+  configure_viewport_info( viewport_info );
 
-  VkPipelineColorBlendStateCreateInfo color_blending = {};
-  color_blending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-  color_blending.logicOpEnable = VK_FALSE;
-  color_blending.logicOp = VK_LOGIC_OP_COPY;
-  color_blending.attachmentCount = 1;
-  color_blending.pAttachments = &color_blend_attachment;
-  color_blending.blendConstants[0] = 0.0f;
-  color_blending.blendConstants[1] = 0.0f;
-  color_blending.blendConstants[2] = 0.0f;
-  color_blending.blendConstants[3] = 0.0f;
+  VkPipelineRasterizationStateCreateInfo rasterizer_info =  {};
+  configure_rasterizer_info( rasterizer_info );
+
+  VkPipelineMultisampleStateCreateInfo multisampling_info =  {};
+  configure_multisampling_info( multisampling_info );
+
+  VkPipelineColorBlendStateCreateInfo color_blend_info =  {};
+  configure_color_blend_info( color_blend_info );
 
   VkPipelineLayoutCreateInfo pipeline_layout_info = {};
-  pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-  pipeline_layout_info.setLayoutCount = 0;
-  pipeline_layout_info.pushConstantRangeCount = 0;
+  configure_pipeline_layout_info( pipeline_layout_info );
 
   VKZ_REQUIRE(
     "creating pipeline layout",
@@ -110,15 +105,17 @@ bool ConfigureGraphicsPipeline::activate()
   pipeline_info.pStages = shader_create_info.data();
   pipeline_info.pVertexInputState = &vertex_input_info;
   pipeline_info.pInputAssemblyState = &input_assembly;
-  pipeline_info.pViewportState = &viewport_state;
-  pipeline_info.pRasterizationState = &rasterizer;
-  pipeline_info.pMultisampleState = &multisampling;
-  pipeline_info.pColorBlendState = &color_blending;
+  pipeline_info.pViewportState = &viewport_info;
+  pipeline_info.pRasterizationState = &rasterizer_info;
+  pipeline_info.pMultisampleState = &multisampling_info;
+  pipeline_info.pColorBlendState = &color_blend_info;
   pipeline_info.pDynamicState = &dynamic_info;
   pipeline_info.layout = context->pipeline_layout;
   pipeline_info.renderPass = context->render_pass;
   pipeline_info.subpass = 0;
   pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
+
+  configure_pipeline_info( pipeline_info );  // adjust any of the above settings as desired
 
   VKZ_REQUIRE(
     "creating graphics pipeline",
@@ -129,6 +126,7 @@ bool ConfigureGraphicsPipeline::activate()
   progress = 2;
 
   for (auto shader_stage : shader_stages) shader_stage->destroy_module();
+
   return true;
 }
 
@@ -163,52 +161,74 @@ void ConfigureGraphicsPipeline::deactivate()
   }
 }
 
-VkPipelineMultisampleStateCreateInfo ConfigureGraphicsPipeline::get_multisampling_config()
+void ConfigureGraphicsPipeline::configure_color_blend_info( VkPipelineColorBlendStateCreateInfo& color_blend_info )
 {
-  VkPipelineMultisampleStateCreateInfo multisampling = {};
-  multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-  multisampling.sampleShadingEnable = VK_FALSE;
-  multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-  return multisampling;
+  color_blend_info.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+  color_blend_info.logicOpEnable = VK_FALSE;
+  color_blend_info.logicOp = VK_LOGIC_OP_COPY;
+  color_blend_info.attachmentCount = 1;
+  color_blend_info.pAttachments = &color_blend_attachment;
+  color_blend_info.blendConstants[0] = 0.0f;
+  color_blend_info.blendConstants[1] = 0.0f;
+  color_blend_info.blendConstants[2] = 0.0f;
+  color_blend_info.blendConstants[3] = 0.0f;
 }
 
-VkPipelineRasterizationStateCreateInfo ConfigureGraphicsPipeline::get_rasterizer_config()
+void ConfigureGraphicsPipeline::configure_multisampling_info( VkPipelineMultisampleStateCreateInfo& multisampling_info )
 {
-  VkPipelineRasterizationStateCreateInfo rasterizer = {};
-  rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-  rasterizer.depthClampEnable = VK_FALSE;
-  rasterizer.rasterizerDiscardEnable = VK_FALSE;
-  rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-  rasterizer.lineWidth = 1.0f;
-  rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-  rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
-  rasterizer.depthBiasEnable = VK_FALSE;
-
-  return rasterizer;
+  multisampling_info.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+  multisampling_info.sampleShadingEnable = VK_FALSE;
+  multisampling_info.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 }
 
-VkPipelineViewportStateCreateInfo ConfigureGraphicsPipeline::get_viewport_config()
+void ConfigureGraphicsPipeline::configure_pipeline_info( VkGraphicsPipelineCreateInfo& pipeline_info )
 {
-  VkViewport viewport = {};
-  viewport.x = 0.0f;
-  viewport.y = 0.0f;
-  viewport.width  = context->surface_size.width;
-  viewport.height = context->surface_size.height;
-  viewport.minDepth = 0.0f;
-  viewport.maxDepth = 1.0f;
+  // pipeline_info is pre-filled; adjust config as desired.
+}
 
-  VkRect2D scissor = {};
-  scissor.offset = { 0, 0 };
-  scissor.extent = context->surface_size;
+void ConfigureGraphicsPipeline::configure_pipeline_layout_info( VkPipelineLayoutCreateInfo& pipeline_layout_info )
+{
+  pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+  pipeline_layout_info.setLayoutCount = 0;
+  pipeline_layout_info.pushConstantRangeCount = 0;
+}
 
-  VkPipelineViewportStateCreateInfo viewport_state = {};
-  viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-  viewport_state.viewportCount = 1;
-  viewport_state.pViewports = &viewport;
-  viewport_state.scissorCount = 1;
-  viewport_state.pScissors = &scissor;
+void ConfigureGraphicsPipeline::configure_rasterizer_info( VkPipelineRasterizationStateCreateInfo& rasterizer_info )
+{
+  rasterizer_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+  rasterizer_info.depthClampEnable = VK_FALSE;
+  rasterizer_info.rasterizerDiscardEnable = VK_FALSE;
+  rasterizer_info.polygonMode = VK_POLYGON_MODE_FILL;
+  rasterizer_info.lineWidth = 1.0f;
+  rasterizer_info.cullMode = VK_CULL_MODE_BACK_BIT;
+  rasterizer_info.frontFace = VK_FRONT_FACE_CLOCKWISE;
+  rasterizer_info.depthBiasEnable = VK_FALSE;
+}
 
-  return viewport_state;
+void ConfigureGraphicsPipeline::configure_viewport_info( VkPipelineViewportStateCreateInfo& viewport_info )
+{
+  viewports.push_back(
+    {
+      .x        = 0,
+      .y        = 0,
+      .width    = (float)context->surface_size.width,
+      .height   = (float)context->surface_size.height,
+      .minDepth = 0.0f,
+      .maxDepth = 1.0f,
+    }
+  );
+
+  scissor_rects.push_back(
+    {
+      .offset = {0,0},
+      .extent = context->surface_size
+    }
+  );
+
+  viewport_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+  viewport_info.viewportCount = viewports.size();
+  viewport_info.pViewports    = viewports.data();
+  viewport_info.scissorCount  = scissor_rects.size();
+  viewport_info.pScissors     = scissor_rects.data();
 }
 
