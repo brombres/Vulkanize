@@ -33,13 +33,7 @@ bool RenderBegin::execute()
   context->device_dispatch.resetFences( 1, &context->fences[context->swap_index] );
 
   context->cmd = context->command_buffers[ context->swap_index ];
-
-  context->device_dispatch.resetCommandBuffer( context->cmd, 0 );
-
-  VkCommandBufferBeginInfo begin_info = {};
-  begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-  begin_info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-  context->device_dispatch.beginCommandBuffer( context->cmd, &begin_info );
+  context->prepare_command_buffer( context->cmd );
 
   VkClearColorValue clear_color = { 0.0f, 0.0f, 1.0f, 1.0f };
   VkClearDepthStencilValue clear_depth_stencil = { 1.0f, 0 };
