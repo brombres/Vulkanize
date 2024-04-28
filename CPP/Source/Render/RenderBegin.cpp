@@ -84,7 +84,7 @@ bool RenderBegin::execute()
 
   VkBuffer vertex_buffers[] = { context->vertex_buffer };
   VkDeviceSize offsets[] = {0};
-  vkCmdBindVertexBuffers( context->cmd, 0, 1, vertex_buffers, offsets );
+  context->device_dispatch.cmdBindVertexBuffers( context->cmd, 0, 1, vertex_buffers, offsets );
 
   return true;
 }

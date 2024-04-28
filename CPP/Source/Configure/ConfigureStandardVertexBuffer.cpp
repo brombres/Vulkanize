@@ -19,12 +19,12 @@ bool ConfigureStandardVertexBuffer::activate()
 
   VKZ_REQUIRE(
     "creating vertex buffer",
-    vkCreateBuffer( context->device, &buffer_info, nullptr, &context->vertex_buffer )
+    context->device_dispatch.createBuffer( &buffer_info, nullptr, &context->vertex_buffer )
   );
   progress = 1;
 
   VkMemoryRequirements mem_requirements;
-  vkGetBufferMemoryRequirements( context->device,  context->vertex_buffer, &mem_requirements );
+  context->device_dispatch.getBufferMemoryRequirements( context->vertex_buffer, &mem_requirements );
 
   VkMemoryAllocateInfo alloc_info{};
   alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -40,17 +40,17 @@ bool ConfigureStandardVertexBuffer::activate()
 
   VKZ_ON_ERROR(
     "allocating memory for vertex buffer",
-    vkAllocateMemory( context->device, &alloc_info, nullptr, &context->vertex_buffer_memory),
+    context->device_dispatch.allocateMemory( &alloc_info, nullptr, &context->vertex_buffer_memory),
     return false;
   );
   progress = 2;
 
-  vkBindBufferMemory( context->device, context->vertex_buffer, context->vertex_buffer_memory, 0 );
+  context->device_dispatch.bindBufferMemory( context->vertex_buffer, context->vertex_buffer_memory, 0 );
 
   void* data;
-  vkMapMemory( context->device, context->vertex_buffer_memory, 0, buffer_info.size, 0, &data );
+  context->device_dispatch.mapMemory( context->vertex_buffer_memory, 0, buffer_info.size, 0, &data );
   memcpy( data, context->vertices.data(), (size_t) buffer_info.size );
-  vkUnmapMemory( context->device, context->vertex_buffer_memory);
+  context->device_dispatch.unmapMemory( context->vertex_buffer_memory);
 
   // Create a staging buffer with the VK_BUFFER_USAGE_TRANSFER_SRC_BIT flag.
   // Map the staging buffer memory once during setup.
@@ -65,7 +65,7 @@ bool ConfigureStandardVertexBuffer::activate()
 
 void ConfigureStandardVertexBuffer::deactivate()
 {
-  if (progress >= 2) vkDestroyBuffer( context->device, context->vertex_buffer, nullptr );
-  if (progress >= 1) vkFreeMemory( context->device, context->vertex_buffer_memory, nullptr );
+  if (progress >= 2) context->device_dispatch.destroyBuffer( context->vertex_buffer, nullptr );
+  if (progress >= 1) context->device_dispatch.freeMemory( context->vertex_buffer_memory, nullptr );
 }
 
