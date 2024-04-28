@@ -13,8 +13,6 @@ namespace VKZ
     virtual ~ConfigureGraphicsPipeline();
 
     virtual bool activate();
-    virtual void add_shader_stage( VkShaderStageFlagBits stage, VkShaderModule module,
-                                   const char* main_function_name="main" );
     virtual void add_shader_stage( VkShaderStageFlagBits stage, std::string shader_filename,
                                    std::string shader_source, const char* main_function_name="main" );
     virtual void add_shader_stage( VkShaderStageFlagBits stage, const char* spirv_bytes, size_t spirv_byte_count,
@@ -22,6 +20,6 @@ namespace VKZ
     virtual void add_vertex_description( VertexDescription* vertex_description );
     virtual void deactivate();
 
-    VkShaderModule _create_shader_module( const Byte* code, int count );
+    VkShaderModule _create_shader_module( const char* code, uint32_t size );
   };
 };

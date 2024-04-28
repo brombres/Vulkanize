@@ -20,8 +20,10 @@ ConfigureGraphicsPipeline::~ConfigureGraphicsPipeline()
 
 bool ConfigureGraphicsPipeline::activate()
 {
-  VkShaderModule vertex_module = compile_shader(
-    context,
+  const char* vertex_shader_bytes;
+  size_t vertex_shader_size;
+  VkShaderModule vertex_module;
+  if (compile_shader(
     VK_SHADER_STAGE_VERTEX_BIT,
     "shader.vert",
     "#version 450\n"
@@ -36,12 +38,20 @@ bool ConfigureGraphicsPipeline::activate()
     "{\n"
       "gl_Position = vec4 (position, 0.0, 1.0);\n"
       "fragColor = color;\n"
-    "}\n"
-  );
-  if (vertex_module == VK_NULL_HANDLE) return false;
+    "}\n",
+    &vertex_shader_bytes,
+    &vertex_shader_size
+  ))
+  {
+    vertex_module = _create_shader_module( vertex_shader_bytes, vertex_shader_size );
+    delete vertex_shader_bytes;
+    if (vertex_module == VK_NULL_HANDLE) return false;
+  }
 
-  VkShaderModule fragment_module = compile_shader(
-    context,
+  const char* fragment_shader_bytes;
+  size_t fragment_shader_size;
+  VkShaderModule fragment_module;
+  if (compile_shader(
     VK_SHADER_STAGE_FRAGMENT_BIT,
     "shader.frag",
     "#version 450\n"
@@ -51,12 +61,18 @@ bool ConfigureGraphicsPipeline::activate()
     "\n"
     "layout (location = 0) out vec4 outColor;\n"
     "\n"
-    "void main () { outColor = vec4 (fragColor, 1.0); }\n"
-  );
-  if (fragment_module == VK_NULL_HANDLE)
+    "void main () { outColor = vec4 (fragColor, 1.0); }\n",
+    &fragment_shader_bytes,
+    &fragment_shader_size
+  ))
   {
-    context->device_dispatch.destroyShaderModule( vertex_module, nullptr );
-    return false;
+    fragment_module = _create_shader_module( fragment_shader_bytes, fragment_shader_size );
+    delete fragment_shader_bytes;
+    if (fragment_module == VK_NULL_HANDLE)
+    {
+      context->device_dispatch.destroyShaderModule( vertex_module, nullptr );
+      return false;
+    }
   }
 
   VkPipelineShaderStageCreateInfo vertex_stage_info = {};
@@ -209,24 +225,17 @@ bool ConfigureGraphicsPipeline::activate()
   return true;
 }
 
-void ConfigureGraphicsPipeline::add_shader_stage( VkShaderStageFlagBits stage, VkShaderModule module,
-    const char* main_function_name )
-{
-  ShaderStageInfo* stage_info = new ShaderStageInfo( stage, module, main_function_name );
-  shader_stages.push_back( stage_info );
-}
-
 void ConfigureGraphicsPipeline::add_shader_stage( VkShaderStageFlagBits stage,
     string shader_filename, string shader_source, const char* main_function_name )
 {
-  ShaderStageInfo* stage_info = new ShaderStageInfo( stage, shader_source, main_function_name );
+  ShaderStageInfo* stage_info = new ShaderStageInfo( context, stage, shader_source, main_function_name );
   shader_stages.push_back( stage_info );
 }
 
 void ConfigureGraphicsPipeline::add_shader_stage( VkShaderStageFlagBits stage, const char* spirv_bytes,
     size_t spirv_byte_count, const char* main_function_name )
 {
-  ShaderStageInfo* stage_info = new ShaderStageInfo( stage, spirv_bytes, spirv_byte_count, main_function_name );
+  ShaderStageInfo* stage_info = new ShaderStageInfo( context, stage, spirv_bytes, spirv_byte_count, main_function_name );
   shader_stages.push_back( stage_info );
 }
 
@@ -241,11 +250,11 @@ void ConfigureGraphicsPipeline::deactivate()
   if (progress >= 1) context->device_dispatch.destroyPipelineLayout( context->pipeline_layout, nullptr );
 }
 
-VkShaderModule ConfigureGraphicsPipeline::_create_shader_module( const Byte* code, int count )
+VkShaderModule ConfigureGraphicsPipeline::_create_shader_module( const char* code, uint32_t size )
 {
   VkShaderModuleCreateInfo create_info = {};
   create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-  create_info.codeSize = count;
+  create_info.codeSize = size;
   create_info.pCode = (const uint32_t*)code;
 
   VkShaderModule shader_module;
