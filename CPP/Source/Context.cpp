@@ -56,7 +56,7 @@ void Context::configure_operations()
   set_operation( "configure.queues",                    new ConfigureQueues() );
   set_operation( "configure.render_passes",             new ConfigureRenderPasses() );
   set_operation( "configure.shaders",                   new ConfigureShaders() );
-  set_operation( "configure.graphics_pipeline",         new ConfigureStandardGraphicsPipeline() );
+  set_operation( "configure.graphics_pipeline",         new ConfigureStandardGraphicsPipeline( &standard_pipeline ) );
   set_operation( "configure.swapchain.framebuffers",    new ConfigureFramebuffers() );
   set_operation( "configure.swapchain.command_pool",    new ConfigureCommandPool() );
   set_operation( "configure.vertex_buffers",            new ConfigureStandardVertexBuffer() );

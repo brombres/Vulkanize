@@ -95,6 +95,7 @@ namespace VKZ
 #include "Vulkanize/VertexDescription.h"
 #include "Vulkanize/CustomVertexDescription.h"
 #include "Vulkanize/StandardVertexDescription.h"
+#include "Vulkanize/GraphicsPipeline.h"
 #include "Vulkanize/Node.h"
 #include "Vulkanize/Operation.h"
 #include "Vulkanize/ContextOperation.h"

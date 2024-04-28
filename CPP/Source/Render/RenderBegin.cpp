@@ -65,7 +65,7 @@ bool RenderBegin::execute()
   context->device_dispatch.cmdBindPipeline(
     context->cmd,
     VK_PIPELINE_BIND_POINT_GRAPHICS,
-    context->graphics_pipeline
+    context->standard_pipeline.pipeline
   );
 
   VkViewport viewport = {};

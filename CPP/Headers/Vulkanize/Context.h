@@ -38,8 +38,7 @@ namespace VKZ
 
     VkRenderPass     render_pass;
 
-    VkPipelineLayout pipeline_layout;
-    VkPipeline       graphics_pipeline;
+    GraphicsPipeline standard_pipeline;
 
     std::vector<StandardVertex>  vertices; // TEST
 

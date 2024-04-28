@@ -3,7 +3,8 @@
 using namespace std;
 using namespace VKZ;
 
-ConfigureGraphicsPipeline::ConfigureGraphicsPipeline()
+ConfigureGraphicsPipeline::ConfigureGraphicsPipeline( GraphicsPipeline* graphics_pipeline )
+  : graphics_pipeline(graphics_pipeline)
 {
   // Default dynamic states
   dynamic_states.push_back( VK_DYNAMIC_STATE_VIEWPORT );
@@ -34,6 +35,8 @@ ConfigureGraphicsPipeline::~ConfigureGraphicsPipeline()
 
 bool ConfigureGraphicsPipeline::activate()
 {
+  graphics_pipeline->context = context;
+
   vector<VkPipelineShaderStageCreateInfo> shader_create_info;
   shader_create_info.resize( shader_stages.size() );
   for (size_t i=0; i<shader_stages.size(); ++i)
@@ -71,8 +74,16 @@ bool ConfigureGraphicsPipeline::activate()
   input_assembly.topology = topology;
   input_assembly.primitiveRestartEnable = enable_primitive_restart;
 
+  graphics_pipeline->viewports.clear();
+  graphics_pipeline->scissor_rects.clear();
+  configure_viewports_and_scissor_rects();
+
   VkPipelineViewportStateCreateInfo viewport_info = {};
-  configure_viewport_info( viewport_info );
+  viewport_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+  viewport_info.viewportCount = graphics_pipeline->viewports.size();
+  viewport_info.pViewports    = graphics_pipeline->viewports.data();
+  viewport_info.scissorCount  = graphics_pipeline->scissor_rects.size();
+  viewport_info.pScissors     = graphics_pipeline->scissor_rects.data();
 
   VkPipelineRasterizationStateCreateInfo rasterizer_info =  {};
   configure_rasterizer_info( rasterizer_info );
@@ -89,7 +100,7 @@ bool ConfigureGraphicsPipeline::activate()
   VKZ_REQUIRE(
     "creating pipeline layout",
     context->device_dispatch.createPipelineLayout(
-      &pipeline_layout_info, nullptr, &context->pipeline_layout
+      &pipeline_layout_info, nullptr, &graphics_pipeline->layout
     )
   );
   progress = 1;
@@ -110,7 +121,7 @@ bool ConfigureGraphicsPipeline::activate()
   pipeline_info.pMultisampleState = &multisampling_info;
   pipeline_info.pColorBlendState = &color_blend_info;
   pipeline_info.pDynamicState = &dynamic_info;
-  pipeline_info.layout = context->pipeline_layout;
+  pipeline_info.layout = graphics_pipeline->layout;
   pipeline_info.renderPass = context->render_pass;
   pipeline_info.subpass = 0;
   pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
@@ -120,7 +131,7 @@ bool ConfigureGraphicsPipeline::activate()
   VKZ_REQUIRE(
     "creating graphics pipeline",
     context->device_dispatch.createGraphicsPipelines(
-      VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &context->graphics_pipeline
+      VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &graphics_pipeline->pipeline
     )
   );
   progress = 2;
@@ -152,8 +163,8 @@ void ConfigureGraphicsPipeline::add_vertex_description( VertexDescription* verte
 
 void ConfigureGraphicsPipeline::deactivate()
 {
-  if (progress >= 2) context->device_dispatch.destroyPipeline( context->graphics_pipeline, nullptr );
-  if (progress >= 1) context->device_dispatch.destroyPipelineLayout( context->pipeline_layout, nullptr );
+  if (progress >= 2) context->device_dispatch.destroyPipeline( graphics_pipeline->pipeline, nullptr );
+  if (progress >= 1) context->device_dispatch.destroyPipelineLayout( graphics_pipeline->layout, nullptr );
 
   for (auto shader_stage : shader_stages)
   {
@@ -205,30 +216,10 @@ void ConfigureGraphicsPipeline::configure_rasterizer_info( VkPipelineRasterizati
   rasterizer_info.depthBiasEnable = VK_FALSE;
 }
 
-void ConfigureGraphicsPipeline::configure_viewport_info( VkPipelineViewportStateCreateInfo& viewport_info )
+void ConfigureGraphicsPipeline::configure_viewports_and_scissor_rects()
 {
-  viewports.push_back(
-    {
-      .x        = 0,
-      .y        = 0,
-      .width    = (float)context->surface_size.width,
-      .height   = (float)context->surface_size.height,
-      .minDepth = 0.0f,
-      .maxDepth = 1.0f,
-    }
-  );
+  graphics_pipeline->set_default_viewport( 0 );
+  graphics_pipeline->set_default_scissor_rect( 0 );
 
-  scissor_rects.push_back(
-    {
-      .offset = {0,0},
-      .extent = context->surface_size
-    }
-  );
-
-  viewport_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-  viewport_info.viewportCount = viewports.size();
-  viewport_info.pViewports    = viewports.data();
-  viewport_info.scissorCount  = scissor_rects.size();
-  viewport_info.pScissors     = scissor_rects.data();
 }
 

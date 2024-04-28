@@ -7,6 +7,8 @@ namespace VKZ
 {
   struct ConfigureGraphicsPipeline : ContextOperation<Context>
   {
+    GraphicsPipeline* graphics_pipeline;
+
     std::vector<ShaderStageInfo*>   shader_stages;
     std::vector<VertexDescription*> vertex_descriptions;
 
@@ -14,15 +16,12 @@ namespace VKZ
     // Constructor default: VK_DYNAMIC_STATE_VIEWPORT, _SCISSOR, and _DEPTH_BIAS
     // clear() and/or push_back() additional dynamic states in configure().
 
-    VkPrimitiveTopology                 topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    VkBool32                            enable_primitive_restart = VK_FALSE;
-
-    std::vector<VkViewport> viewports;
-    std::vector<VkRect2D>   scissor_rects;
+    VkPrimitiveTopology     topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    VkBool32                enable_primitive_restart = VK_FALSE;
 
     VkPipelineColorBlendAttachmentState color_blend_attachment = {};
 
-    ConfigureGraphicsPipeline();
+    ConfigureGraphicsPipeline( GraphicsPipeline* graphics_pipeline );
     virtual ~ConfigureGraphicsPipeline();
 
     virtual bool activate();
@@ -39,6 +38,6 @@ namespace VKZ
     virtual void configure_pipeline_info( VkGraphicsPipelineCreateInfo& pipeline_info );
     virtual void configure_pipeline_layout_info( VkPipelineLayoutCreateInfo& pipeline_layout_info );
     virtual void configure_rasterizer_info( VkPipelineRasterizationStateCreateInfo& rasterizer_info );
-    virtual void configure_viewport_info( VkPipelineViewportStateCreateInfo& viewport_state );
+    virtual void configure_viewports_and_scissor_rects();
   };
 };
