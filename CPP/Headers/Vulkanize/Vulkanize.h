@@ -119,7 +119,6 @@ namespace VKZ
 #include "Vulkanize/Configure/ConfigureFences.h"
 #include "Vulkanize/Render/RenderBegin.h"
 #include "Vulkanize/Render/RenderEnd.h"
-#include "Vulkanize/Configure/ConfigureShaders.h"
 
 #if (VKZ_USE_GLSLANG)
   #include "Vulkanize/Configure/ConfigureGLSLang.h"
