@@ -36,7 +36,7 @@ namespace VKZ
     VkQueue  graphics_queue;
     VkQueue  present_queue;
 
-    RenderPass render_pass;
+    VkRenderPass render_pass;
 
     GraphicsPipeline standard_pipeline;
 

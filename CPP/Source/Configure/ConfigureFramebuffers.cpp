@@ -14,7 +14,7 @@ bool ConfigureFramebuffers::activate()
 
     VkFramebufferCreateInfo framebuffer_info = {};
     framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebuffer_info.renderPass = context->render_pass.vk_render_pass;
+    framebuffer_info.renderPass = context->render_pass;
     framebuffer_info.attachmentCount = static_cast<uint32_t>(attachments.size());
     framebuffer_info.pAttachments = attachments.data();
     framebuffer_info.width = context->surface_size.width;

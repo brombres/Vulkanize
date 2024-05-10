@@ -41,7 +41,7 @@ bool RenderBegin::execute()
   // Begin render pass
   VkRenderPassBeginInfo render_pass_info = {};
   render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-  render_pass_info.renderPass = context->render_pass.vk_render_pass;
+  render_pass_info.renderPass = context->render_pass;
   render_pass_info.framebuffer = context->framebuffers[context->swap_index];
   render_pass_info.renderArea.offset = {0, 0};
   render_pass_info.renderArea.extent = context->surface_size;

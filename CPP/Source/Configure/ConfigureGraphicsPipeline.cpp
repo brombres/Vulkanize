@@ -122,7 +122,7 @@ bool ConfigureGraphicsPipeline::activate()
   pipeline_info.pColorBlendState = &color_blend_info;
   pipeline_info.pDynamicState = &dynamic_info;
   pipeline_info.layout = graphics_pipeline->layout;
-  pipeline_info.renderPass = context->render_pass.vk_render_pass;
+  pipeline_info.renderPass = context->render_pass;
   pipeline_info.subpass = 0;
   pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
 

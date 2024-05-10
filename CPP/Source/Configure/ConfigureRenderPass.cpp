@@ -103,7 +103,7 @@ bool ConfigureRenderPass::activate()
     context->device_dispatch.createRenderPass(
       &render_pass_info,
       nullptr,
-      &context->render_pass.vk_render_pass
+      &context->render_pass
     )
   );
   return true;
@@ -128,7 +128,7 @@ void ConfigureRenderPass::clear()
 
 void ConfigureRenderPass::deactivate()
 {
-  context->device_dispatch.destroyRenderPass( context->render_pass.vk_render_pass, nullptr );
+  context->device_dispatch.destroyRenderPass( context->render_pass, nullptr );
   clear();
 }
 
