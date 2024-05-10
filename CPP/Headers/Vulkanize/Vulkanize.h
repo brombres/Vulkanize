@@ -71,8 +71,8 @@ namespace VKZ
   }                                                            \
 }
 
-#define VKZ_REPORT_ERROR(action)                                   \
-  VKZ_LOG_ERROR( "[ERROR] Balefire Vulkan: error %s.\n", action ); \
+#define VKZ_REPORT_ERROR(action)                         \
+  VKZ_LOG_ERROR( "[Vulkanize] Error %s.\n", action );
 
 #define VKZ_ON_ERROR(action,cmd,on_error)                \
 	{                                                      \
@@ -80,7 +80,7 @@ namespace VKZ
 		if (err)                                             \
 		{                                                    \
       VKZ_LOG_ERROR(                                     \
-          "[ERROR] Balefire Vulkan: error %s (%s).\n",   \
+          "[Vulkanize] Error %s (%s).\n",                \
           action, Vulkanize::vkResult_to_c_string(err)   \
       );                                                 \
       on_error;                                          \
@@ -96,6 +96,7 @@ namespace VKZ
 #include "Vulkanize/CustomVertexDescription.h"
 #include "Vulkanize/StandardVertexDescription.h"
 #include "Vulkanize/GraphicsPipeline.h"
+#include "Vulkanize/RenderPass.h"
 #include "Vulkanize/Node.h"
 #include "Vulkanize/Operation.h"
 #include "Vulkanize/ContextOperation.h"
@@ -107,7 +108,7 @@ namespace VKZ
 #include "Vulkanize/Configure/ConfigureSwapchain.h"
 #include "Vulkanize/Configure/ConfigureDepthStencil.h"
 #include "Vulkanize/Configure/ConfigureQueues.h"
-#include "Vulkanize/Configure/ConfigureRenderPasses.h"
+#include "Vulkanize/Configure/ConfigureRenderPass.h"
 #include "Vulkanize/Configure/ConfigureGraphicsPipeline.h"
 #include "Vulkanize/Configure/ConfigureStandardGraphicsPipeline.h"
 #include "Vulkanize/Configure/ConfigureFramebuffers.h"

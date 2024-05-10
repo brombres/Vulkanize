@@ -122,7 +122,7 @@ bool ConfigureGraphicsPipeline::activate()
   pipeline_info.pColorBlendState = &color_blend_info;
   pipeline_info.pDynamicState = &dynamic_info;
   pipeline_info.layout = graphics_pipeline->layout;
-  pipeline_info.renderPass = context->render_pass;
+  pipeline_info.renderPass = context->render_pass.vk_render_pass;
   pipeline_info.subpass = 0;
   pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
 
@@ -131,7 +131,7 @@ bool ConfigureGraphicsPipeline::activate()
   VKZ_REQUIRE(
     "creating graphics pipeline",
     context->device_dispatch.createGraphicsPipelines(
-      VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &graphics_pipeline->pipeline
+      VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &graphics_pipeline->vk_pipeline
     )
   );
   progress = 2;
@@ -163,7 +163,7 @@ void ConfigureGraphicsPipeline::add_vertex_description( VertexDescription* verte
 
 void ConfigureGraphicsPipeline::deactivate()
 {
-  if (progress >= 2) context->device_dispatch.destroyPipeline( graphics_pipeline->pipeline, nullptr );
+  if (progress >= 2) context->device_dispatch.destroyPipeline( graphics_pipeline->vk_pipeline, nullptr );
   if (progress >= 1) context->device_dispatch.destroyPipelineLayout( graphics_pipeline->layout, nullptr );
 
   for (auto shader_stage : shader_stages)

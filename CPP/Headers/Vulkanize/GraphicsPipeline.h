@@ -9,7 +9,7 @@ namespace VKZ
     Context*         context;
 
     VkPipelineLayout layout;
-    VkPipeline       pipeline;
+    VkPipeline       vk_pipeline;
 
     std::vector<VkViewport> viewports;
     std::vector<VkRect2D>   scissor_rects;
