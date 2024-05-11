@@ -72,18 +72,6 @@ void Context::add_operation( std::string phase, Operation* operation )
   Process::add_operation( phase, operation );
 }
 
-
-void Context::prepare_command_buffer( VkCommandBuffer cmd, VkCommandBufferUsageFlagBits usage_flags,
-    VkCommandBufferResetFlagBits reset_flags )
-{
-  device_dispatch.resetCommandBuffer( cmd, reset_flags );
-
-  VkCommandBufferBeginInfo begin_info = {};
-  begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-  begin_info.flags = usage_flags;
-  device_dispatch.beginCommandBuffer( cmd, &begin_info );
-}
-
 void Context::destroy()
 {
   device_dispatch.deviceWaitIdle();
@@ -105,6 +93,17 @@ int Context::find_memory_type( uint32_t typeFilter, VkMemoryPropertyFlags proper
   }
 
   return -1;
+}
+
+void Context::prepare_command_buffer( VkCommandBuffer cmd, VkCommandBufferUsageFlagBits usage_flags,
+    VkCommandBufferResetFlagBits reset_flags )
+{
+  device_dispatch.resetCommandBuffer( cmd, reset_flags );
+
+  VkCommandBufferBeginInfo begin_info = {};
+  begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  begin_info.flags = usage_flags;
+  device_dispatch.beginCommandBuffer( cmd, &begin_info );
 }
 
 void Context::recreate_swapchain()

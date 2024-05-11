@@ -89,6 +89,7 @@ namespace VKZ
 
 #define VKZ_REQUIRE(action,cmd) VKZ_ON_ERROR(action,cmd,return false;)
 
+#include "Vulkanize/Buffer.h"
 #include "Vulkanize/ShaderStageInfo.h"
 #include "Vulkanize/Image.h"
 #include "Vulkanize/StandardVertex.h"

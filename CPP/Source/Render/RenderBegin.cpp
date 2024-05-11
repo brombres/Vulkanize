@@ -61,7 +61,7 @@ bool RenderBegin::execute()
   context->standard_pipeline.set_default_scissor_rect( 0 );
   context->standard_pipeline.cmd_set_viewports_and_scissor_rects( context->cmd );
 
-  VkBuffer vertex_buffers[] = { context->vertex_buffer };
+  VkBuffer vertex_buffers[] = { context->vertex_buffer.buffer };
   VkDeviceSize offsets[] = {0};
   context->device_dispatch.cmdBindVertexBuffers( context->cmd, 0, 1, vertex_buffers, offsets );
 

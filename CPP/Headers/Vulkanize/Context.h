@@ -43,8 +43,7 @@ namespace VKZ
     std::vector<StandardVertex>  vertices; // TEST
 
     VkCommandPool                command_pool;
-    VkBuffer                     vertex_buffer;
-    VkDeviceMemory               vertex_buffer_memory;
+    Buffer                       vertex_buffer;
     std::vector<VkCommandBuffer> command_buffers;
     VkCommandBuffer              cmd;
 
@@ -65,11 +64,11 @@ namespace VKZ
     virtual void configure_operations();
 
     virtual void add_operation( std::string phase, Operation* operation );
+    virtual void destroy();
+    virtual int  find_memory_type( uint32_t typeFilter, VkMemoryPropertyFlags properties );
     virtual void prepare_command_buffer( VkCommandBuffer cmd,
         VkCommandBufferUsageFlagBits usage_flags=VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT,
         VkCommandBufferResetFlagBits reset_flags=(VkCommandBufferResetFlagBits)0 );
-    virtual void destroy();
-    virtual int  find_memory_type( uint32_t typeFilter, VkMemoryPropertyFlags properties );
     virtual void recreate_swapchain();
     virtual void set_operation( std::string phase, Operation* operation );
   };
