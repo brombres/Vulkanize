@@ -13,17 +13,26 @@ bool ConfigureStandardVertexBuffer::activate()
 
   VkDeviceSize size = sizeof(StandardVertex) * context->vertices.size();
 
-  if ( !context->vertex_buffer.create(
+  Buffer staging_buffer;
+  if ( !staging_buffer.create(
     context,
     size,
-    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+    VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
   ) ) return false;
 
-  void* data;
-  context->device_dispatch.mapMemory( context->vertex_buffer.memory, 0, size, 0, &data );
-  memcpy( data, context->vertices.data(), (size_t) size );
-  context->device_dispatch.unmapMemory( context->vertex_buffer.memory);
+  staging_buffer.copy_from( context->vertices.data(), (size_t) size );
+
+  if ( !context->vertex_buffer.create(
+    context,
+    size,
+    VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+  ) ) return false;
+
+  staging_buffer.copy_to( 0, size, context->vertex_buffer );
+  staging_buffer.destroy();
+
   return true;
 }
 
