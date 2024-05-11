@@ -57,7 +57,7 @@ VkShaderModule ShaderStageInfo::get_module()
   string action = "creating shader module '";
   action.append( shader_filename );
   action.append( "'" );
-  VKZ_ON_ERROR(
+  VKZ_ATTEMPT(
     action.c_str(),
     context->device_dispatch.createShaderModule( &create_info, nullptr, &module ),
     return VK_NULL_HANDLE;

@@ -98,13 +98,14 @@ bool ConfigureRenderPass::activate()
   render_pass_info.dependencyCount = subpass_dependencies.size();
   render_pass_info.pDependencies = subpass_dependencies.data();
 
-  VKZ_REQUIRE(
+  VKZ_ATTEMPT(
     "creating render pass",
     context->device_dispatch.createRenderPass(
       &render_pass_info,
       nullptr,
       &context->render_pass
-    )
+    ),
+    return false
   );
   return true;
 }

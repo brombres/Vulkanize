@@ -10,9 +10,10 @@ bool ConfigureFences::activate()
     VkFenceCreateInfo fence_info = {};
     fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-    VKZ_REQUIRE(
+    VKZ_ATTEMPT(
       "creating fence",
-      context->device_dispatch.createFence( &fence_info, nullptr, &context->fences[i] )
+      context->device_dispatch.createFence( &fence_info, nullptr, &context->fences[i] ),
+      return false
     );
   }
   return true;

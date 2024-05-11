@@ -97,11 +97,12 @@ bool ConfigureGraphicsPipeline::activate()
   VkPipelineLayoutCreateInfo pipeline_layout_info = {};
   configure_pipeline_layout_info( pipeline_layout_info );
 
-  VKZ_REQUIRE(
+  VKZ_ATTEMPT(
     "creating pipeline layout",
     context->device_dispatch.createPipelineLayout(
       &pipeline_layout_info, nullptr, &graphics_pipeline->layout
-    )
+    ),
+    return false
   );
   progress = 1;
 
@@ -128,11 +129,12 @@ bool ConfigureGraphicsPipeline::activate()
 
   configure_pipeline_info( pipeline_info );  // adjust any of the above settings as desired
 
-  VKZ_REQUIRE(
+  VKZ_ATTEMPT(
     "creating graphics pipeline",
     context->device_dispatch.createGraphicsPipelines(
       VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &graphics_pipeline->vk_pipeline
-    )
+    ),
+    return false
   );
   progress = 2;
 

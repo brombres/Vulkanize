@@ -9,9 +9,10 @@ bool ConfigureCommandPool::activate()
   pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
   pool_info.queueFamilyIndex = context->graphics_QueueFamilyIndex;
 
-  VKZ_REQUIRE(
+  VKZ_ATTEMPT(
     "creating command pool",
-    context->device_dispatch.createCommandPool( &pool_info, nullptr, &context->command_pool )
+    context->device_dispatch.createCommandPool( &pool_info, nullptr, &context->command_pool ),
+    return false
   );
 
   return true;

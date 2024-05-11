@@ -74,7 +74,7 @@ namespace VKZ
 #define VKZ_REPORT_ERROR(action)                         \
   VKZ_LOG_ERROR( "[Vulkanize] Error %s.\n", action );
 
-#define VKZ_ON_ERROR(action,cmd,on_error)                \
+#define VKZ_ATTEMPT(action,cmd,on_error)                \
 	{                                                      \
 		auto err = cmd;                                      \
 		if (err)                                             \
@@ -86,8 +86,6 @@ namespace VKZ
       on_error;                                          \
 		}                                                    \
 	}
-
-#define VKZ_REQUIRE(action,cmd) VKZ_ON_ERROR(action,cmd,return false;)
 
 #include "Vulkanize/Buffer.h"
 #include "Vulkanize/ShaderStageInfo.h"

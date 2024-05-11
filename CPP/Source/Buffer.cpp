@@ -13,9 +13,10 @@ bool Buffer::create( Context* context, VkDeviceSize size, VkBufferUsageFlags usa
   buffer_info.usage = usage;
   buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  VKZ_REQUIRE(
+  VKZ_ATTEMPT(
     "creating buffer",
-    context->device_dispatch.createBuffer( &buffer_info, nullptr, &buffer )
+    context->device_dispatch.createBuffer( &buffer_info, nullptr, &buffer ),
+    return false
   );
   allocation_stage = 1;
 
@@ -33,7 +34,7 @@ bool Buffer::create( Context* context, VkDeviceSize size, VkBufferUsageFlags usa
   }
   alloc_info.memoryTypeIndex = (uint32_t) mem_type;
 
-  VKZ_ON_ERROR(
+  VKZ_ATTEMPT(
     "allocating memory for buffer",
     context->device_dispatch.allocateMemory( &alloc_info, nullptr, &memory),
     destroy(); return false;

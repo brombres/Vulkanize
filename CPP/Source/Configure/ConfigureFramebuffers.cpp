@@ -21,9 +21,10 @@ bool ConfigureFramebuffers::activate()
     framebuffer_info.height = context->surface_size.height;
     framebuffer_info.layers = 1;
 
-    VKZ_REQUIRE(
+    VKZ_ATTEMPT(
       "creating framebuffer",
-      context->device_dispatch.createFramebuffer( &framebuffer_info, nullptr, &context->framebuffers[i] )
+      context->device_dispatch.createFramebuffer( &framebuffer_info, nullptr, &context->framebuffers[i] ),
+      return false
     );
   }
   return true;

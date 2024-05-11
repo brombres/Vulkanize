@@ -37,7 +37,7 @@ bool Image::create( Context* context, int width, int height, VkFormat format,
   image_info.samples = VK_SAMPLE_COUNT_1_BIT;
   image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  VKZ_ON_ERROR(
+  VKZ_ATTEMPT(
     "creating image",
     context->device_dispatch.createImage( &image_info, nullptr, &image ),
     return false;
@@ -54,7 +54,7 @@ bool Image::create( Context* context, int width, int height, VkFormat format,
   alloc_info.allocationSize = memory_requirements.size;
   alloc_info.memoryTypeIndex = memory_type_index;
 
-  VKZ_ON_ERROR(
+  VKZ_ATTEMPT(
     "allocating image memory",
     context->device_dispatch.allocateMemory( &alloc_info, nullptr, &memory ),
     destroy();
@@ -75,7 +75,7 @@ bool Image::create( Context* context, int width, int height, VkFormat format,
   view_info.subresourceRange.baseArrayLayer = 0;
   view_info.subresourceRange.layerCount = 1;
 
-  VKZ_ON_ERROR(
+  VKZ_ATTEMPT(
     "creating image view",
     context->device_dispatch.createImageView( &view_info, nullptr, &view ),
     destroy();
