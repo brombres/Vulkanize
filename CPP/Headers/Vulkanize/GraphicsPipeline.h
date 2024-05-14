@@ -15,6 +15,7 @@ namespace VKZ
     std::vector<VkRect2D>   scissor_rects;
 
     void cmd_bind( VkCommandBuffer cmd );
+    void cmd_set_default_viewports_and_scissor_rects( VkCommandBuffer cmd );
     void cmd_set_viewports_and_scissor_rects( VkCommandBuffer cmd );
 
     void set_default_scissor_rect( int index );

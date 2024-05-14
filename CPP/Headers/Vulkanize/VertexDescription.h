@@ -20,6 +20,8 @@ namespace VKZ
   // VertexDescription directly.
   struct VertexDescription
   {
+    virtual ~VertexDescription() {}
+
     // Return 'true' if there is one vertex per instance rather than one vertex per vertex.
     virtual bool per_instance() { return false; }
 

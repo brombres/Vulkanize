@@ -52,7 +52,7 @@ bool ConfigureGraphicsPipeline::activate()
     vertex_description->collect_binding_description( binding_descriptions );
     binding_descriptions.back().binding = binding;
 
-    uint32_t i = attribute_descriptions.size();
+    size_t i = attribute_descriptions.size();
     vertex_description->collect_attribute_descriptions( attribute_descriptions );
     for (; i<attribute_descriptions.size(); ++i)
     {
@@ -64,8 +64,8 @@ bool ConfigureGraphicsPipeline::activate()
 
   VkPipelineVertexInputStateCreateInfo vertex_input_info = {};
   vertex_input_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  vertex_input_info.vertexBindingDescriptionCount = binding_descriptions.size();
-  vertex_input_info.vertexAttributeDescriptionCount = attribute_descriptions.size();
+  vertex_input_info.vertexBindingDescriptionCount = (uint32_t)binding_descriptions.size();
+  vertex_input_info.vertexAttributeDescriptionCount = (uint32_t)attribute_descriptions.size();
   vertex_input_info.pVertexBindingDescriptions = binding_descriptions.data();
   vertex_input_info.pVertexAttributeDescriptions = attribute_descriptions.data();
 
@@ -80,9 +80,9 @@ bool ConfigureGraphicsPipeline::activate()
 
   VkPipelineViewportStateCreateInfo viewport_info = {};
   viewport_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-  viewport_info.viewportCount = graphics_pipeline->viewports.size();
+  viewport_info.viewportCount = (uint32_t)graphics_pipeline->viewports.size();
   viewport_info.pViewports    = graphics_pipeline->viewports.data();
-  viewport_info.scissorCount  = graphics_pipeline->scissor_rects.size();
+  viewport_info.scissorCount  = (uint32_t)graphics_pipeline->scissor_rects.size();
   viewport_info.pScissors     = graphics_pipeline->scissor_rects.data();
 
   VkPipelineRasterizationStateCreateInfo rasterizer_info =  {};
@@ -113,7 +113,7 @@ bool ConfigureGraphicsPipeline::activate()
 
   VkGraphicsPipelineCreateInfo pipeline_info = {};
   pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-  pipeline_info.stageCount = shader_create_info.size();
+  pipeline_info.stageCount = (uint32_t)shader_create_info.size();
   pipeline_info.pStages = shader_create_info.data();
   pipeline_info.pVertexInputState = &vertex_input_info;
   pipeline_info.pInputAssemblyState = &input_assembly;

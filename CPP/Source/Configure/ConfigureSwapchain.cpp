@@ -25,7 +25,7 @@ bool ConfigureSwapchain::activate()
 
   context->swapchain_images = context->swapchain.get_images().value();
   context->swapchain_image_views = context->swapchain.get_image_views().value();
-  context->swapchain_count = context->swapchain_images.size();
+  context->swapchain_count = (uint32_t)context->swapchain_images.size();
 
   return true;
 }

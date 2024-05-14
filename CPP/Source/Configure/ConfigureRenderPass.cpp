@@ -35,7 +35,7 @@ ConfigureRenderPass::~ConfigureRenderPass()
 
 Subpass* ConfigureRenderPass::add_subpass()
 {
-  Subpass* subpass = new Subpass( subpasses.size() );
+  Subpass* subpass = new Subpass( (uint32_t)subpasses.size() );
   subpasses.push_back( subpass );
   return subpass;
 }
@@ -63,7 +63,8 @@ bool ConfigureRenderPass::activate()
 
   Subpass* subpass = add_subpass();
 
-  VkSubpassDependency& dependency = add_subpass_dependency( VK_SUBPASS_EXTERNAL, subpass->index );
+  add_subpass_dependency( VK_SUBPASS_EXTERNAL, subpass->index );
+  // VkSubpassDependency& dependency = add_subpass_dependency( VK_SUBPASS_EXTERNAL, subpass->index );
   // These are the default settings for the new dependency - adjust as needed.
   // dependency.srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
   // dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -95,7 +96,7 @@ bool ConfigureRenderPass::activate()
   render_pass_info.pAttachments = attachment_descriptions.data();
   render_pass_info.subpassCount = (uint32_t)subpasses.size();
   render_pass_info.pSubpasses = subpass_descriptions.data();
-  render_pass_info.dependencyCount = subpass_dependencies.size();
+  render_pass_info.dependencyCount = (uint32_t)subpass_dependencies.size();
   render_pass_info.pDependencies = subpass_dependencies.data();
 
   VKZ_ATTEMPT(
@@ -135,7 +136,7 @@ void ConfigureRenderPass::deactivate()
 
 Attachment* ConfigureRenderPass::create_attachment()
 {
-  Attachment* attachment = new Attachment( attachments.size() );
+  Attachment* attachment = new Attachment( (uint32_t)attachments.size() );
   attachments.push_back( attachment );
   attachment->description.samples        = VK_SAMPLE_COUNT_1_BIT;
   attachment->description.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;

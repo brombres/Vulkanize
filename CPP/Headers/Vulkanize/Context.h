@@ -40,9 +40,8 @@ namespace VKZ
 
     GraphicsPipeline standard_pipeline;
 
-    std::vector<StandardVertex>  vertices; // TEST
-
     VkCommandPool                command_pool;
+    Buffer                       staging_buffer;
     Buffer                       vertex_buffer;
     std::vector<VkCommandBuffer> command_buffers;
     VkCommandBuffer              cmd;
