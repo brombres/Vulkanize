@@ -11,13 +11,13 @@ bool ConfigureStandardVertexBuffer::activate()
   vertices.push_back( StandardVertex( 0.5f, 0.5f, 0, 0xff00ff00) );
   vertices.push_back( StandardVertex(-0.5f, 0.5f, 0, 0xffff0000) );
 
-  if ( !context->staging_buffer.create_staging_buffer(context,sizeof(StandardVertex),vertices.size()) ) return false;
+  if ( !context->staging_buffer.create_staging_buffer(context,sizeof(StandardVertex),(uint32_t)vertices.size()) ) return false;
 
-  context->staging_buffer.copy_from( vertices.data(), vertices.size() );
+  context->staging_buffer.copy_from( vertices.data(), (uint32_t)vertices.size() );
 
-  if ( !context->vertex_buffer.create_vertex_buffer(context,sizeof(StandardVertex),vertices.size()) ) return false;
+  if ( !context->vertex_buffer.create_vertex_buffer(context,sizeof(StandardVertex),(uint32_t)vertices.size()) ) return false;
 
-  context->staging_buffer.copy_to( 0, vertices.size(), context->vertex_buffer );
+  context->vertex_buffer.copy_from( context->staging_buffer );
 
   return true;
 }

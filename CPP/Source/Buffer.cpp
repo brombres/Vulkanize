@@ -8,16 +8,17 @@ void Buffer::cmd_bind( VkCommandBuffer cmd )
   context->device_dispatch.cmdBindVertexBuffers( cmd, 0, 1, vertex_buffers, offsets );
 }
 
-bool Buffer::create( Context* context, size_t element_size, size_t count, VkBufferUsageFlags usage,
+bool Buffer::create( Context* context, uint32_t element_size, uint32_t initial_capacity, VkBufferUsageFlags usage,
     VkMemoryPropertyFlags mem_properties )
 {
   this->context = context;
   this->element_size = element_size;
-  this->count = count;
+  this->capacity = initial_capacity;
+  this->count = 0;
   this->usage = usage;
   this->mem_properties = mem_properties;
 
-  VkDeviceSize size = element_size * count;
+  VkDeviceSize size = element_size * capacity;
 
   VkBufferCreateInfo buffer_info{};
   buffer_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -58,46 +59,37 @@ bool Buffer::create( Context* context, size_t element_size, size_t count, VkBuff
 }
 
 
-bool Buffer::create_staging_buffer( Context* context, size_t element_size, size_t count )
+bool Buffer::create_staging_buffer( Context* context, uint32_t element_size, uint32_t initial_capacity )
 {
   return create(
     context,
     element_size,
-    count,
+    initial_capacity,
     VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
   );
 }
 
-bool Buffer::create_vertex_buffer( Context* context, size_t element_size, size_t count )
+bool Buffer::create_vertex_buffer( Context* context, uint32_t element_size, uint32_t initial_capacity )
 {
   return create(
     context,
     element_size,
-    count,
+    initial_capacity,
     VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
   );
 }
 
-
-bool Buffer::copy_from( void* src_data, size_t n, size_t dest_index )
+bool Buffer::copy_from( Buffer& src )
 {
-  if (allocation_stage < 2) return false;
-  if ( !ensure_count( dest_index + n ) ) return false;
-
-  void* dest_data;
-  context->device_dispatch.mapMemory( memory, dest_index*element_size, n*element_size, 0, &dest_data );
-  memcpy( dest_data, src_data, (size_t)(n*element_size) );
-  context->device_dispatch.unmapMemory( memory);
-
-  return true;
+  return copy_from( src, 0, src.count, 0 );
 }
 
-bool Buffer::copy_to( size_t src_index, size_t n, Buffer& dest, size_t dest_index )
+bool Buffer::copy_from( Buffer& src, uint32_t src_index, uint32_t n, uint32_t dest_index )
 {
-  if (allocation_stage < 2) return false;
-  if ( !dest.ensure_count( dest_index + n ) ) return false;
+  if ( !(src.is_ready() && this->is_ready()) ) return false;
+  if ( !ensure_capacity( dest_index + n ) ) return false;
 
   // We may want to use a separate command pool with VK_COMMAND_POOL_CREATE_TRANSIENT_BIT
   VkCommandBufferAllocateInfo alloc_info = {};
@@ -119,7 +111,7 @@ bool Buffer::copy_to( size_t src_index, size_t n, Buffer& dest, size_t dest_inde
   copy_info.srcOffset = src_index;
   copy_info.dstOffset = dest_index;
   copy_info.size = element_size * n;
-  context->device_dispatch.cmdCopyBuffer( cmd, vk_buffer, dest.vk_buffer, 1, &copy_info );
+  context->device_dispatch.cmdCopyBuffer( cmd, src.vk_buffer, vk_buffer, 1, &copy_info );
 
   context->device_dispatch.endCommandBuffer( cmd );
 
@@ -133,6 +125,23 @@ bool Buffer::copy_to( size_t src_index, size_t n, Buffer& dest, size_t dest_inde
 
   context->device_dispatch.freeCommandBuffers( context->command_pool, 1, &cmd );
 
+  if (count < dest_index + n) count = dest_index + n;
+
+  return true;
+}
+
+bool Buffer::copy_from( void* src_data, uint32_t n, uint32_t dest_index )
+{
+  if (allocation_stage < 2) return false;
+  if ( !ensure_capacity( dest_index + n ) ) return false;
+
+  void* dest_data;
+  context->device_dispatch.mapMemory( memory, dest_index*element_size, n*element_size, 0, &dest_data );
+  memcpy( dest_data, src_data, (uint32_t)(n*element_size) );
+  context->device_dispatch.unmapMemory( memory);
+
+  if (count < dest_index + n) count = dest_index + n;
+
   return true;
 }
 
@@ -143,10 +152,10 @@ void Buffer::destroy()
   allocation_stage = 0;
 }
 
-bool Buffer::ensure_count( size_t required_count )
+bool Buffer::ensure_capacity( uint32_t required_capacity )
 {
-  if (count >= required_count) return true;
+  if (capacity >= required_capacity) return true;
 
   destroy();
-  return create(  context, element_size, required_count, usage, mem_properties );
+  return create(  context, element_size, required_capacity, usage, mem_properties );
 }
