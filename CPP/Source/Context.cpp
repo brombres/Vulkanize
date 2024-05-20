@@ -48,17 +48,18 @@ Context::~Context()
 
 void Context::configure_operations()
 {
-  set_operation( "configure.device",                    new ConfigureDevice(1,2) );
-  set_operation( "configure.formats",                   new ConfigureFormats() );
-  set_operation( "configure.swapchain.surface_size",    new ConfigureSurfaceSize() );
-  set_operation( "configure.swapchain",                 new ConfigureSwapchain() );
-  set_operation( "configure.swapchain.depth_stencil",   new ConfigureDepthStencil() );
-  set_operation( "configure.queues",                    new ConfigureQueues() );
-  set_operation( "configure.render_passes",             new ConfigureRenderPass() );
-  set_operation( "configure.graphics_pipeline",         new ConfigureStandardGraphicsPipeline( &standard_pipeline ) );
-  set_operation( "configure.swapchain.framebuffers",    new ConfigureFramebuffers() );
-  set_operation( "configure.swapchain.command_pool",    new ConfigureCommandPool() );
-  set_operation( "configure.vertex_buffers",            new ConfigureStandardVertexBuffer() );
+  set_operation( "configure.device",                  new ConfigureDevice(1,2) );
+  set_operation( "configure.formats",                 new ConfigureFormats() );
+  set_operation( "configure.swapchain.surface_size",  new ConfigureSurfaceSize() );
+  set_operation( "configure.swapchain",               new ConfigureSwapchain() );
+  set_operation( "configure.swapchain.depth_stencil", new ConfigureDepthStencil() );
+  set_operation( "configure.queues",                  new ConfigureQueues() );
+  set_operation( "configure.render_passes",           new ConfigureRenderPass() );
+  set_operation( "configure.graphics_pipelines",      new ConfigureGFXTriangleListColor(&gfx_triangle_list_color) );
+  add_operation( "configure.graphics_pipelines",      new ConfigureGFXLineListColor(&gfx_line_list_color) );
+  set_operation( "configure.swapchain.framebuffers",  new ConfigureFramebuffers() );
+  set_operation( "configure.swapchain.command_pool",  new ConfigureCommandPool() );
+  set_operation( "configure.vertex_buffers",          new ConfigureStandardVertexBuffer() );
   set_operation( "configure.swapchain.command_buffers", new ConfigureCommandBuffers() );
   set_operation( "configure.semaphores",                new ConfigureSemaphores() );
   set_operation( "configure.fences",                    new ConfigureFences() );

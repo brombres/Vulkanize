@@ -18,7 +18,7 @@ namespace VKZ
 
     //----- Constructor/Destructor ---------------------------------------------
     Operation() {}
-    virtual ~Operation();
+    virtual ~Operation() {}
 
     //----- Event Callbacks ----------------------------------------------------
     virtual bool activate() { return true; }

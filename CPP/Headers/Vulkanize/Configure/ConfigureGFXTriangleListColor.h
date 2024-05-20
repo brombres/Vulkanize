@@ -5,9 +5,9 @@
 
 namespace VKZ
 {
-  struct ConfigureStandardGraphicsPipeline : ConfigureGraphicsPipeline
+  struct ConfigureGFXTriangleListColor : ConfigureGraphicsPipeline
   {
-    ConfigureStandardGraphicsPipeline( GraphicsPipeline* graphics_pipeline )
+    ConfigureGFXTriangleListColor( GraphicsPipeline* graphics_pipeline )
       : ConfigureGraphicsPipeline(graphics_pipeline) {}
     virtual void configure();
   };

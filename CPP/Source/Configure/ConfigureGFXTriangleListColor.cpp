@@ -3,8 +3,10 @@
 using namespace std;
 using namespace VKZ;
 
-void ConfigureStandardGraphicsPipeline::configure()
+void ConfigureGFXTriangleListColor::configure()
 {
+  topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
   add_vertex_description( new StandardVertexDescription() );
 
   add_shader_stage( VK_SHADER_STAGE_VERTEX_BIT,

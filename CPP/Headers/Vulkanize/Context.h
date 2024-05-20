@@ -38,7 +38,8 @@ namespace VKZ
 
     VkRenderPass render_pass;
 
-    GraphicsPipeline standard_pipeline;
+    GraphicsPipeline gfx_line_list_color;
+    GraphicsPipeline gfx_triangle_list_color;
 
     VkCommandPool                command_pool;
     Buffer                       staging_buffer;

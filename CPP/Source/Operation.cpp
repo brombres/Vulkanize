@@ -2,16 +2,17 @@
 using namespace VKZ;
 using namespace std;
 
-Operation::~Operation()
-{
-  if (next_sibling) delete next_sibling;
-  if (first_child)  delete first_child;
-
-  if (parent)
-  {
-    parent->remove_child( this );
-  }
-}
+// Base class Node handles this
+//Operation::~Operation()
+//{
+//  if (next_sibling) delete next_sibling;
+//  if (first_child)  delete first_child;
+//
+//  if (parent)
+//  {
+//    parent->remove_child( this );
+//  }
+//}
 
 bool Operation::handle_event( Event event )
 {
