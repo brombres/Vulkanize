@@ -9,6 +9,6 @@ namespace VKZ
   {
     ConfigureGFXLineListColor( GraphicsPipeline* graphics_pipeline )
       : ConfigureGraphicsPipeline(graphics_pipeline) {}
-    virtual void configure();
+    virtual void on_configure();
   };
 };

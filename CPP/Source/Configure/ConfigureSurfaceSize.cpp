@@ -2,7 +2,7 @@
 #include "Vulkanize/Vulkanize.h"
 using namespace VKZ;
 
-bool ConfigureSurfaceSize::activate()
+bool ConfigureSurfaceSize::on_activate()
 {
   VkSurfaceCapabilitiesKHR surface_capabilities;
 

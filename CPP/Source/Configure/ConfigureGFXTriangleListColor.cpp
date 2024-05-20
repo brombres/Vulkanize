@@ -3,7 +3,7 @@
 using namespace std;
 using namespace VKZ;
 
-void ConfigureGFXTriangleListColor::configure()
+void ConfigureGFXTriangleListColor::on_configure()
 {
   topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 

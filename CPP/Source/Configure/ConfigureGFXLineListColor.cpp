@@ -3,7 +3,7 @@
 using namespace std;
 using namespace VKZ;
 
-void ConfigureGFXLineListColor::configure()
+void ConfigureGFXLineListColor::on_configure()
 {
   topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
 

@@ -6,6 +6,6 @@ namespace VKZ
 {
   struct RenderEnd : ContextOperation<Context>
   {
-    virtual bool execute();
+    virtual bool on_execute();
   };
 };

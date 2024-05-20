@@ -6,7 +6,7 @@ namespace VKZ
 {
   struct ConfigureFences : ContextOperation<Context>
   {
-    virtual bool activate();
-    virtual void deactivate();
+    virtual bool on_activate();
+    virtual void on_deactivate();
   };
 };

@@ -8,8 +8,8 @@ namespace VKZ
   {
     bool reconfiguring = false;
 
-    virtual bool activate();
-    virtual void deactivate();
+    virtual bool on_activate();
+    virtual void on_deactivate();
     virtual void on_surface_lost();
   };
 };

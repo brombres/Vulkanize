@@ -2,7 +2,7 @@
 #include "Vulkanize/Vulkanize.h"
 using namespace VKZ;
 
-bool ConfigureDepthStencil::activate()
+bool ConfigureDepthStencil::on_activate()
 {
   VkFormat depth_format;
   if ( !_find_supported_depth_format( &depth_format ) )
@@ -24,7 +24,7 @@ bool ConfigureDepthStencil::activate()
   return true;
 }
 
-void ConfigureDepthStencil::deactivate()
+void ConfigureDepthStencil::on_deactivate()
 {
   context->depth_stencil.destroy();
 }

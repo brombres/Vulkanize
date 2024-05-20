@@ -7,7 +7,7 @@ ConfigureDevice::ConfigureDevice( int major_version, int minor_version )
 {
 }
 
-bool ConfigureDevice::activate()
+bool ConfigureDevice::on_activate()
 {
   //features12.bufferDeviceAddress = true;
   //features12.descriptorIndexing = true;
@@ -39,7 +39,7 @@ bool ConfigureDevice::activate()
   return true;
 }
 
-void ConfigureDevice::deactivate()
+void ConfigureDevice::on_deactivate()
 {
   context->device_dispatch.deviceWaitIdle();
   vkb::destroy_device( context->device );

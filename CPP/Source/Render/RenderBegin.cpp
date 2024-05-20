@@ -2,7 +2,7 @@
 #include "Vulkanize/Vulkanize.h"
 using namespace VKZ;
 
-bool RenderBegin::execute()
+bool RenderBegin::on_execute()
 {
   VkResult result = context->device_dispatch.acquireNextImageKHR(
     context->swapchain,

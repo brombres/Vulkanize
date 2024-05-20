@@ -2,7 +2,7 @@
 #include "Vulkanize/Vulkanize.h"
 using namespace VKZ;
 
-bool ConfigureQueues::activate()
+bool ConfigureQueues::on_activate()
 {
   context->graphics_QueueFamilyIndex = context->device.get_queue_index( vkb::QueueType::graphics ).value();
   context->present_QueueFamilyIndex  = context->device.get_queue_index( vkb::QueueType::present ).value();

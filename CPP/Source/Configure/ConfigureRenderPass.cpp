@@ -57,7 +57,7 @@ VkSubpassDependency& ConfigureRenderPass::add_subpass_dependency(
   return dependency;
 }
 
-bool ConfigureRenderPass::activate()
+bool ConfigureRenderPass::on_activate()
 {
   clear();
 
@@ -128,7 +128,7 @@ void ConfigureRenderPass::clear()
   subpass_dependencies.clear();
 }
 
-void ConfigureRenderPass::deactivate()
+void ConfigureRenderPass::on_deactivate()
 {
   context->device_dispatch.destroyRenderPass( context->render_pass, nullptr );
   clear();

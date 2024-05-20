@@ -2,7 +2,7 @@
 #include "Vulkanize/Vulkanize.h"
 using namespace VKZ;
 
-bool ConfigureSemaphores::activate()
+bool ConfigureSemaphores::on_activate()
 {
   uint32_t swapchain_count = context->swapchain_count;
   context->image_available_semaphores.resize( swapchain_count );
@@ -15,7 +15,7 @@ bool ConfigureSemaphores::activate()
   return true;
 }
 
-void ConfigureSemaphores::deactivate()
+void ConfigureSemaphores::on_deactivate()
 {
   uint32_t semaphore_count = context->swapchain_count;
   for (uint32_t i=0; i<semaphore_count; ++i)

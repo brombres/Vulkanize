@@ -2,7 +2,7 @@
 #include "Vulkanize/Vulkanize.h"
 using namespace VKZ;
 
-bool ConfigureCommandBuffers::activate()
+bool ConfigureCommandBuffers::on_activate()
 {
   VkCommandBufferAllocateInfo allocateInfo = {};
   allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -15,7 +15,7 @@ bool ConfigureCommandBuffers::activate()
   return true;
 }
 
-void ConfigureCommandBuffers::deactivate()
+void ConfigureCommandBuffers::on_deactivate()
 {
   context->device_dispatch.freeCommandBuffers(
     context->command_pool,

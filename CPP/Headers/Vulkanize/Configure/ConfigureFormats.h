@@ -4,6 +4,6 @@ namespace VKZ
 {
   struct ConfigureFormats : ContextOperation<Context>
   {
-    virtual bool activate();
+    virtual bool on_activate();
   };
 };

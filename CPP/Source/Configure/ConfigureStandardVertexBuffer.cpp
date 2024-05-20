@@ -4,7 +4,7 @@ using namespace VKZ;
 
 #include "glslang/Include/glslang_c_interface.h"
 
-bool ConfigureStandardVertexBuffer::activate()
+bool ConfigureStandardVertexBuffer::on_activate()
 {
   std::vector<StandardVertex> vertices;
   vertices.push_back( StandardVertex( 0.0f,-0.5f, 0, 0xff0000ff) );
@@ -22,7 +22,7 @@ bool ConfigureStandardVertexBuffer::activate()
   return true;
 }
 
-void ConfigureStandardVertexBuffer::deactivate()
+void ConfigureStandardVertexBuffer::on_deactivate()
 {
   context->vertex_buffer.destroy();
   context->staging_buffer.destroy();

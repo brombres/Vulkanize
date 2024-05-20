@@ -33,7 +33,7 @@ ConfigureGraphicsPipeline::~ConfigureGraphicsPipeline()
   }
 }
 
-bool ConfigureGraphicsPipeline::activate()
+bool ConfigureGraphicsPipeline::on_activate()
 {
   graphics_pipeline->context = context;
 
@@ -163,7 +163,7 @@ void ConfigureGraphicsPipeline::add_vertex_description( VertexDescription* verte
   vertex_descriptions.push_back( vertex_description );
 }
 
-void ConfigureGraphicsPipeline::deactivate()
+void ConfigureGraphicsPipeline::on_deactivate()
 {
   if (progress >= 2) context->device_dispatch.destroyPipeline( graphics_pipeline->vk_pipeline, nullptr );
   if (progress >= 1) context->device_dispatch.destroyPipelineLayout( graphics_pipeline->layout, nullptr );

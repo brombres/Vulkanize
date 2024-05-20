@@ -2,7 +2,7 @@
 #include "Vulkanize/Vulkanize.h"
 using namespace VKZ;
 
-bool ConfigureFences::activate()
+bool ConfigureFences::on_activate()
 {
   context->fences.resize( context->swapchain_count );
   for (uint32_t i=0; i<context->swapchain_count; ++i)
@@ -19,7 +19,7 @@ bool ConfigureFences::activate()
   return true;
 }
 
-void ConfigureFences::deactivate()
+void ConfigureFences::on_deactivate()
 {
   for (auto fence : context->fences)
   {

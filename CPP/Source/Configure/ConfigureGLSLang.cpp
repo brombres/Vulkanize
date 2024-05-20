@@ -4,13 +4,13 @@ using namespace VKZ;
 
 #include "glslang/Include/glslang_c_interface.h"
 
-bool ConfigureGLSLang::activate()
+bool ConfigureGLSLang::on_activate()
 {
   glslang_initialize_process();
   return true;
 }
 
-void ConfigureGLSLang::deactivate()
+void ConfigureGLSLang::on_deactivate()
 {
   glslang_finalize_process();
 }

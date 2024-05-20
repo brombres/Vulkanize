@@ -2,7 +2,7 @@
 #include "Vulkanize/Vulkanize.h"
 using namespace VKZ;
 
-bool RenderEnd::execute()
+bool RenderEnd::on_execute()
 {
   context->device_dispatch.cmdEndRenderPass( context->cmd );
   context->device_dispatch.endCommandBuffer( context->cmd );

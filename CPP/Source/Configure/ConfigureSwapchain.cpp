@@ -2,7 +2,7 @@
 #include "Vulkanize/Vulkanize.h"
 using namespace VKZ;
 
-bool ConfigureSwapchain::activate()
+bool ConfigureSwapchain::on_activate()
 {
 	vkb::SwapchainBuilder swapchain_builder{ context->device };
   swapchain_builder
@@ -30,7 +30,7 @@ bool ConfigureSwapchain::activate()
   return true;
 }
 
-void ConfigureSwapchain::deactivate()
+void ConfigureSwapchain::on_deactivate()
 {
   context->swapchain.destroy_image_views( context->swapchain_image_views );
   if ( !reconfiguring ) vkb::destroy_swapchain( context->swapchain );

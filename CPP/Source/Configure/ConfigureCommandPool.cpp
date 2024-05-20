@@ -2,7 +2,7 @@
 #include "Vulkanize/Vulkanize.h"
 using namespace VKZ;
 
-bool ConfigureCommandPool::activate()
+bool ConfigureCommandPool::on_activate()
 {
   VkCommandPoolCreateInfo pool_info = {};
   pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -18,7 +18,7 @@ bool ConfigureCommandPool::activate()
   return true;
 }
 
-void ConfigureCommandPool::deactivate()
+void ConfigureCommandPool::on_deactivate()
 {
   context->device_dispatch.destroyCommandPool( context->command_pool, nullptr );
 }

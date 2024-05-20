@@ -87,8 +87,8 @@ namespace VKZ
 
     virtual ~ConfigureRenderPass();
 
-    virtual bool activate();
-    virtual void deactivate();
+    virtual bool on_activate();
+    virtual void on_deactivate();
 
     virtual Subpass*             add_subpass();
     virtual VkSubpassDependency& add_subpass_dependency( uint32_t source_subpass_index, uint32_t dest_subpass_index );

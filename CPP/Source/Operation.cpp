@@ -2,17 +2,55 @@
 using namespace VKZ;
 using namespace std;
 
-// Base class Node handles this
-//Operation::~Operation()
-//{
-//  if (next_sibling) delete next_sibling;
-//  if (first_child)  delete first_child;
-//
-//  if (parent)
-//  {
-//    parent->remove_child( this );
-//  }
-//}
+bool Operation::activate()
+{
+  configure();
+
+  if ( !active )
+  {
+    if ( !on_activate() ) return false;
+    active = true;
+  }
+
+  return true;
+}
+
+void Operation::configure()
+{
+  if (configured) return;
+  configured = true;
+  on_configure();
+}
+
+bool Operation::execute()
+{
+  configure();
+  return on_execute();
+}
+
+void Operation::deactivate()
+{
+  configure();
+
+  if (active || progress)
+  {
+    on_deactivate();
+    active = false;
+    progress = 0;
+  }
+}
+
+bool Operation::custom_event( const char* name )
+{
+  configure();
+  return on_custom_event( name );
+}
+
+void Operation::surface_lost()
+{
+  configure();
+  on_surface_lost();
+}
 
 bool Operation::handle_event( Event event )
 {
@@ -24,14 +62,14 @@ bool Operation::handle_event( Event event )
 
   if ( !configured ) {
     configured = true;
-    configure();
+    on_configure();
   }
 
   if (event.type == EventType::DEACTIVATE)
   {
     if (active || progress)
     {
-      deactivate();
+      on_deactivate();
       active = false;
       progress = 0;
     }
@@ -40,13 +78,13 @@ bool Operation::handle_event( Event event )
   {
     if ( !active )
     {
-      if ( !activate() ) return false;
+      if ( !on_activate() ) return false;
       active = true;
     }
   }
   else if (event.type == EventType::EXECUTE)
   {
-    if ( !execute() ) return false;
+    if ( !on_execute() ) return false;
   }
   else if (event.type == EventType::SURFACE_LOST)
   {
