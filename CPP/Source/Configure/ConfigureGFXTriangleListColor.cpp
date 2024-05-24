@@ -15,7 +15,7 @@ void ConfigureGFXTriangleListColor::on_configure()
     "#extension GL_ARB_separate_shader_objects : enable\n"
     "\n"
     "layout (location = 0) in vec2 position;\n"
-    "layout (location = 2) in vec3 color;\n"
+    "layout (location = 1) in vec3 color;\n"
     "\n"
     "layout (location = 0) out vec3 fragColor;\n"
     "\n"
