@@ -22,10 +22,10 @@ namespace VKZ
     virtual void cmd_bind( VkCommandBuffer cmd );
     virtual bool create( Context* context, uint32_t element_size, uint32_t initial_capacity, VkBufferUsageFlags usage,
         VkMemoryPropertyFlags mem_properties );
-    virtual bool create_staging_buffer( Context* context, uint32_t element_size, uint32_t initial_capacity );
-    virtual bool create_vertex_buffer( Context* context, uint32_t element_size, uint32_t initial_capacity );
-    virtual bool copy_from( Buffer& src );
-    virtual bool copy_from( Buffer& src, uint32_t src_index, uint32_t n, uint32_t dest_index=0 );
+    virtual bool create_staging_buffer( Context* context, uint32_t element_size, uint32_t initial_capacity=0 );
+    virtual bool create_vertex_buffer( Context* context, uint32_t element_size, uint32_t initial_capacity=0 );
+    virtual bool copy_from( Buffer* src );
+    virtual bool copy_from( Buffer* src, uint32_t src_index, uint32_t n, uint32_t dest_index=0 );
     virtual bool copy_from( void* src_data, uint32_t n, uint32_t dest_index=0 );
     virtual void destroy();
     virtual bool ensure_capacity( uint32_t required_capacity );

@@ -28,6 +28,7 @@ void Process::add_operation( string phase, Operation* operation )
   {
     // This phase does not yet exist.
     phases.push_back( phase );
+    operations[phase] = operation;
   }
 }
 

@@ -69,7 +69,7 @@ void Context::configure_operations()
 
 void Context::add_operation( std::string phase, Operation* operation )
 {
-  operation->set_context( this );
+  if (operation) operation->set_context( this );
   Process::add_operation( phase, operation );
 }
 
@@ -117,6 +117,6 @@ void Context::recreate_swapchain()
 
 void Context::set_operation( std::string phase, Operation* operation )
 {
-  operation->set_context( this );
+  if (operation) operation->set_context( this );
   Process::set_operation( phase, operation );
 }

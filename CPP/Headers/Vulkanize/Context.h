@@ -42,9 +42,11 @@ namespace VKZ
     GraphicsPipeline gfx_triangle_list_color;
 
     VkCommandPool                command_pool;
-    Buffer                       staging_buffer;
-    Buffer                       vertex_buffer;
+    std::vector<Buffer>          vertex_buffers;
+    std::vector<Buffer>          staging_buffers;
     std::vector<VkCommandBuffer> command_buffers;
+    Buffer*                      vertex_buffer = nullptr;
+    Buffer*                      staging_buffer = nullptr;
     VkCommandBuffer              cmd;
 
     std::vector<VkSemaphore> image_available_semaphores;

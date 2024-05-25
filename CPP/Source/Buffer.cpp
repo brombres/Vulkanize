@@ -18,6 +18,8 @@ bool Buffer::create( Context* context, uint32_t element_size, uint32_t initial_c
   this->usage = usage;
   this->mem_properties = mem_properties;
 
+  if (initial_capacity == 0) return true;
+
   VkDeviceSize size = element_size * capacity;
 
   VkBufferCreateInfo buffer_info{};
@@ -81,15 +83,15 @@ bool Buffer::create_vertex_buffer( Context* context, uint32_t element_size, uint
   );
 }
 
-bool Buffer::copy_from( Buffer& src )
+bool Buffer::copy_from( Buffer* src )
 {
-  return copy_from( src, 0, src.count, 0 );
+  return copy_from( src, 0, src->count, 0 );
 }
 
-bool Buffer::copy_from( Buffer& src, uint32_t src_index, uint32_t n, uint32_t dest_index )
+bool Buffer::copy_from( Buffer* src, uint32_t src_index, uint32_t n, uint32_t dest_index )
 {
-  if ( !(src.is_ready() && this->is_ready()) ) return false;
-  if ( !ensure_capacity( dest_index + n ) ) return false;
+  if ( !ensure_capacity( dest_index + n ) )     return false;
+  if ( !(src->is_ready() && this->is_ready()) ) return false;
 
   // We may want to use a separate command pool with VK_COMMAND_POOL_CREATE_TRANSIENT_BIT
   VkCommandBufferAllocateInfo alloc_info = {};
@@ -111,7 +113,7 @@ bool Buffer::copy_from( Buffer& src, uint32_t src_index, uint32_t n, uint32_t de
   copy_info.srcOffset = src_index;
   copy_info.dstOffset = dest_index;
   copy_info.size = element_size * n;
-  context->device_dispatch.cmdCopyBuffer( cmd, src.vk_buffer, vk_buffer, 1, &copy_info );
+  context->device_dispatch.cmdCopyBuffer( cmd, src->vk_buffer, vk_buffer, 1, &copy_info );
 
   context->device_dispatch.endCommandBuffer( cmd );
 
@@ -132,8 +134,9 @@ bool Buffer::copy_from( Buffer& src, uint32_t src_index, uint32_t n, uint32_t de
 
 bool Buffer::copy_from( void* src_data, uint32_t n, uint32_t dest_index )
 {
-  if (allocation_stage < 2) return false;
+  if (n == 0) return true;
   if ( !ensure_capacity( dest_index + n ) ) return false;
+  if (allocation_stage < 2) return false;
 
   void* dest_data;
   context->device_dispatch.mapMemory( memory, dest_index*element_size, n*element_size, 0, &dest_data );
