@@ -38,9 +38,6 @@ namespace VKZ
 
     VkRenderPass render_pass;
 
-    GraphicsPipeline gfx_line_list_color;
-    GraphicsPipeline gfx_triangle_list_color;
-
     VkCommandPool                command_pool;
     std::vector<Buffer>          vertex_buffers;
     std::vector<Buffer>          staging_buffers;

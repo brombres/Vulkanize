@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <algorithm> // for std::find
 
 #include "Vulkanize/Vulkanize.h"
 using namespace VKZ;
@@ -26,8 +27,11 @@ void Process::add_operation( string phase, Operation* operation )
   }
   else
   {
-    // This phase does not yet exist.
-    phases.push_back( phase );
+    if (std::find(phases.begin(), phases.end(), phase) == phases.end())
+    {
+      // This phase is not yet defined in the process.
+      phases.push_back( phase );
+    }
     operations[phase] = operation;
   }
 }
@@ -103,9 +107,9 @@ void Process::set_operation( string phase, Operation* operation )
   {
     delete existing;
   }
-  else
+  else if (std::find(phases.begin(), phases.end(), phase) == phases.end())
   {
-    // This phase does not yet exist in 'phases'.
+    // This phase is not yet defined in the process.
     phases.push_back( phase );
   }
   operations[phase] = operation;

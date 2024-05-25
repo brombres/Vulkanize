@@ -4,19 +4,19 @@ using namespace VKZ;
 
 #include "glslang/Include/glslang_c_interface.h"
 
-bool ConfigureStandardVertexBuffer::on_activate()
+bool ConfigureVertexBuffers::on_activate()
 {
   context->staging_buffers.resize( context->swapchain_count );
   context->vertex_buffers.resize( context->swapchain_count );
 
   for (int i=0; i<context->swapchain_count; ++i)
   {
-    if ( !context->staging_buffers[i].create_staging_buffer(context,sizeof(StandardVertex)) )
+    if ( !context->staging_buffers[i].create_staging_buffer(context,sizeof_vertex) )
     {
       return false;
     }
 
-    if ( !context->vertex_buffers[i].create_vertex_buffer(context,sizeof(StandardVertex)) )
+    if ( !context->vertex_buffers[i].create_vertex_buffer(context,sizeof_vertex) )
     {
       return false;
     }
@@ -25,7 +25,7 @@ bool ConfigureStandardVertexBuffer::on_activate()
   return true;
 }
 
-void ConfigureStandardVertexBuffer::on_deactivate()
+void ConfigureVertexBuffers::on_deactivate()
 {
   context->staging_buffers.clear();
   context->staging_buffer = nullptr;
