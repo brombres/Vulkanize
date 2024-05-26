@@ -1,10 +1,10 @@
 #include "Vulkanize.h"
 using namespace VKZ;
 
-void Buffer::cmd_bind( VkCommandBuffer cmd )
+void Buffer::cmd_bind( VkCommandBuffer cmd, VkDeviceSize offset )
 {
   VkBuffer vertex_buffers[] = { vk_buffer };
-  VkDeviceSize offsets[] = {0};
+  VkDeviceSize offsets[] = {offset};
   context->device_dispatch.cmdBindVertexBuffers( cmd, 0, 1, vertex_buffers, offsets );
 }
 
@@ -60,6 +60,16 @@ bool Buffer::create( Context* context, uint32_t element_size, uint32_t initial_c
   return true;
 }
 
+bool Buffer::create_index_buffer( Context* context, uint32_t element_size, uint32_t initial_capacity )
+{
+  return create(
+    context,
+    element_size,
+    initial_capacity,
+    VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+  );
+}
 
 bool Buffer::create_staging_buffer( Context* context, uint32_t element_size, uint32_t initial_capacity )
 {
@@ -70,6 +80,20 @@ bool Buffer::create_staging_buffer( Context* context, uint32_t element_size, uin
     VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
   );
+}
+
+bool Buffer::create_uniform_buffer( Context* context, uint32_t size )
+{
+  if ( !create(
+    context,
+    1,
+    size,
+    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+  ) ) return false;
+
+  count = size;
+  return true;
 }
 
 bool Buffer::create_vertex_buffer( Context* context, uint32_t element_size, uint32_t initial_capacity )
@@ -138,10 +162,16 @@ bool Buffer::copy_from( void* src_data, uint32_t n, uint32_t dest_index )
   if ( !ensure_capacity( dest_index + n ) ) return false;
   if (allocation_stage < 2) return false;
 
-  void* dest_data;
-  context->device_dispatch.mapMemory( memory, dest_index*element_size, n*element_size, 0, &dest_data );
-  memcpy( dest_data, src_data, (uint32_t)(n*element_size) );
-  context->device_dispatch.unmapMemory( memory);
+  if (mapped_memory)
+  {
+    memcpy( (unsigned char*)mapped_memory + (dest_index*element_size), src_data, (uint32_t)(n*element_size) );
+  }
+  else
+  {
+    map();
+    memcpy( (unsigned char*)mapped_memory + (dest_index*element_size), src_data, (uint32_t)(n*element_size) );
+    unmap();
+  }
 
   if (count < dest_index + n) count = dest_index + n;
 
@@ -150,6 +180,7 @@ bool Buffer::copy_from( void* src_data, uint32_t n, uint32_t dest_index )
 
 void Buffer::destroy()
 {
+  unmap();
   if (allocation_stage >= 2) context->device_dispatch.destroyBuffer( vk_buffer, nullptr );
   if (allocation_stage >= 1) context->device_dispatch.freeMemory( memory, nullptr );
   allocation_stage = 0;
@@ -159,6 +190,34 @@ bool Buffer::ensure_capacity( uint32_t required_capacity )
 {
   if (capacity >= required_capacity) return true;
 
+  bool mapped = (mapped_memory != nullptr);
   destroy();
-  return create(  context, element_size, required_capacity, usage, mem_properties );
+  if ( !create(context, element_size, required_capacity, usage, mem_properties) ) return false;
+  if (mapped) return true;
+  return true;
 }
+
+void* Buffer::map( uint32_t index, uint32_t element_count )
+{
+  if (mapped_memory) return mapped_memory;
+  if (capacity == 0) {
+    VKZ_REPORT_ERROR( "mapping memory of zero-capacity buffer" );
+    return 0;
+  }
+
+  if (element_count == -1) element_count = capacity - index;
+
+  context->device_dispatch.mapMemory( memory, index*element_size, element_count*element_size, 0, &mapped_memory );
+
+  return mapped_memory;
+}
+
+void Buffer::unmap()
+{
+  if (mapped_memory)
+  {
+    context->device_dispatch.unmapMemory( memory );
+    mapped_memory = nullptr;
+  }
+}
+

@@ -11,12 +11,12 @@ bool ConfigureVertexBuffers::on_activate()
 
   for (int i=0; i<context->swapchain_count; ++i)
   {
-    if ( !context->staging_buffers[i].create_staging_buffer(context,sizeof_vertex) )
+    if ( !context->staging_buffers[i].create_staging_buffer(context,(uint32_t)sizeof_vertex) )
     {
       return false;
     }
 
-    if ( !context->vertex_buffers[i].create_vertex_buffer(context,sizeof_vertex) )
+    if ( !context->vertex_buffers[i].create_vertex_buffer(context,(uint32_t)sizeof_vertex) )
     {
       return false;
     }
