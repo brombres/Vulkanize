@@ -55,13 +55,19 @@ void Context::configure_operations()
   set_operation( "configure.swapchain.depth_stencil",   new ConfigureDepthStencil() );
   set_operation( "configure.queues",                    new ConfigureQueues() );
   set_operation( "configure.render_passes",             new ConfigureRenderPass() );
-  set_operation( "configure.graphics_pipelines",        nullptr );
   set_operation( "configure.swapchain.framebuffers",    new ConfigureFramebuffers() );
   set_operation( "configure.swapchain.command_pool",    new ConfigureCommandPool() );
-  set_operation( "configure.vertex_buffers",            nullptr );
   set_operation( "configure.swapchain.command_buffers", new ConfigureCommandBuffers() );
   set_operation( "configure.semaphores",                new ConfigureSemaphores() );
   set_operation( "configure.fences",                    new ConfigureFences() );
+  set_operation( "configure.vertex_buffers",            nullptr );
+  set_operation( "configure.index_buffers",             nullptr );
+  set_operation( "configure.uniform_descriptors",       nullptr );
+  set_operation( "configure.descriptor.layouts",        nullptr );
+  set_operation( "configure.uniform_buffers",           nullptr );
+  set_operation( "configure.descriptor.pool",           nullptr );
+  set_operation( "configure.descriptor.sets",           nullptr );
+  set_operation( "configure.graphics_pipelines",        nullptr );
   set_operation( "render.begin",                        new RenderBegin() );
   set_operation( "render.end",                          new RenderEnd() );
 }
