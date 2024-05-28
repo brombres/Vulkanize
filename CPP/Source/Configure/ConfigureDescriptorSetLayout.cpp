@@ -24,7 +24,7 @@ bool ConfigureDescriptorSetLayout::on_activate()
     "creating descriptor set layout",
     context->device_dispatch.createDescriptorSetLayout( &layout_info, nullptr, layout ),
     return false
-  )
+  );
 
   return true;
 }
