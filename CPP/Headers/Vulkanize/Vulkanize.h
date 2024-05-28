@@ -87,8 +87,7 @@ namespace VKZ
 		}                                                    \
 	}
 
-#include "Vulkanize/DescriptorSet.h"
-#include "Vulkanize/DescriptorSetLayout.h"
+#include "Vulkanize/UniformDescriptors.h"
 #include "Vulkanize/Buffer.h"
 #include "Vulkanize/ShaderStageInfo.h"
 #include "Vulkanize/Image.h"

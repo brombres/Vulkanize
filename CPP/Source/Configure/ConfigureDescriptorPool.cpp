@@ -11,14 +11,14 @@ void ConfigureDescriptorPool::add_pool_size( VkDescriptorType type, uint32_t cou
   pool_sizes.push_back( pool_size );
 }
 
-void ConfigureDescriptorPool::add_uniform_buffers( uint32_t count )
+void ConfigureDescriptorPool::add_combined_image_sampler()
 {
-  add_pool_size( VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, count*context->swapchain_count );
+  add_pool_size( VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, context->swapchain_count );
 }
 
-void ConfigureDescriptorPool::on_configure()
+void ConfigureDescriptorPool::add_uniform_buffer()
 {
-  add_uniform_buffers( uniform_buffer_count );
+  add_pool_size( VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, context->swapchain_count );
 }
 
 bool ConfigureDescriptorPool::on_activate()
