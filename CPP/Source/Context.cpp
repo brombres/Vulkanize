@@ -8,12 +8,6 @@
 using namespace VKZ;
 using namespace std;
 
-#include "glslang/Include/glslang_c_interface.h"
-
-// Required for use of glslang_default_resource
-#include <glslang/Public/resource_limits_c.h>
-
-
 Context::Context( VkSurfaceKHR surface ) : surface(surface)
 {
   if ( !Vulkanize::instance )
@@ -60,13 +54,8 @@ void Context::configure_operations()
   set_operation( "configure.swapchain.command_buffers", new ConfigureCommandBuffers() );
   set_operation( "configure.semaphores",                new ConfigureSemaphores() );
   set_operation( "configure.fences",                    new ConfigureFences() );
-  set_operation( "configure.vertex_buffers",            nullptr );
-  set_operation( "configure.index_buffers",             nullptr );
-  set_operation( "configure.uniform_descriptors",       nullptr );
-  set_operation( "configure.descriptor.layouts",        nullptr );
-  set_operation( "configure.uniform_buffers",           nullptr );
-  set_operation( "configure.descriptor.pool",           nullptr );
-  set_operation( "configure.descriptor.sets",           nullptr );
+  set_operation( "configure.buffers",                   nullptr );
+  set_operation( "configure.descriptors",               nullptr );
   set_operation( "configure.graphics_pipelines",        nullptr );
   set_operation( "render.begin",                        new RenderBegin() );
   set_operation( "render.end",                          new RenderEnd() );

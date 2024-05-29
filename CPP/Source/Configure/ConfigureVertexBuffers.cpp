@@ -2,8 +2,6 @@
 #include "Vulkanize/Vulkanize.h"
 using namespace VKZ;
 
-#include "glslang/Include/glslang_c_interface.h"
-
 bool ConfigureVertexBuffers::on_activate()
 {
   context->staging_buffers.resize( context->swapchain_count );

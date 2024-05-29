@@ -35,18 +35,22 @@ VkShaderModule ShaderStageInfo::get_module()
 
   if (type == SOURCE)
   {
-    const char* shader_bytes;
-    size_t shader_size;
-    if (compile_shader(stage, shader_filename, shader_source, &shader_bytes, &shader_size))
-    {
-      type = SPIRV;
-      this->spirv_bytecode.assign( shader_bytes, shader_size );
-      delete shader_bytes;
-    }
-    else
-    {
-      return VK_NULL_HANDLE;
-    }
+    #if VKZ_USE_GLSLANG
+      const char* shader_bytes;
+      size_t shader_size;
+      if (compile_shader(stage, shader_filename, shader_source, &shader_bytes, &shader_size))
+      {
+        type = SPIRV;
+        this->spirv_bytecode.assign( shader_bytes, shader_size );
+        delete shader_bytes;
+      }
+      else
+      {
+        return VK_NULL_HANDLE;
+      }
+    #else
+      #error "To dynamically compile .glsl shaders from source, integrate the GLSLang library and define VKZ_USE_GLSLANG as 1."
+    #endif
   }
 
   VkShaderModuleCreateInfo create_info = {};
