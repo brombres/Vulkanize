@@ -11,6 +11,8 @@ namespace VKZ
     VkPipelineLayout layout;
     VkPipeline       vk_pipeline;
 
+    Descriptors*     descriptors = nullptr;
+
     std::vector<VkViewport> viewports;
     std::vector<VkRect2D>   scissor_rects;
 

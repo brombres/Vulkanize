@@ -204,6 +204,12 @@ void ConfigureGraphicsPipeline::configure_pipeline_layout_info( VkPipelineLayout
   pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   pipeline_layout_info.setLayoutCount = 0;
   pipeline_layout_info.pushConstantRangeCount = 0;
+
+  if (descriptors)
+  {
+    pipeline_layout_info.setLayoutCount = 1;
+    pipeline_layout_info.pSetLayouts = &descriptors->layout;
+  }
 }
 
 void ConfigureGraphicsPipeline::configure_rasterizer_info( VkPipelineRasterizationStateCreateInfo& rasterizer_info )

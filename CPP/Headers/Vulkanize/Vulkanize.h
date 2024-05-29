@@ -87,8 +87,8 @@ namespace VKZ
 		}                                                    \
 	}
 
-#include "Vulkanize/Descriptors.h"
 #include "Vulkanize/Buffer.h"
+#include "Vulkanize/Descriptors.h"
 #include "Vulkanize/ShaderStageInfo.h"
 #include "Vulkanize/Image.h"
 #include "Vulkanize/VertexDescription.h"
@@ -114,9 +114,6 @@ namespace VKZ
 #include "Vulkanize/Configure/ConfigureSemaphores.h"
 #include "Vulkanize/Configure/ConfigureFences.h"
 #include "Vulkanize/Configure/ConfigureDescriptors.h"
-#include "Vulkanize/Configure/ConfigureDescriptorSetLayout.h"
-#include "Vulkanize/Configure/ConfigureDescriptorPool.h"
-#include "Vulkanize/Configure/ConfigureDescriptorSet.h"
 #include "Vulkanize/Render/RenderBegin.h"
 #include "Vulkanize/Render/RenderEnd.h"
 
