@@ -25,10 +25,14 @@ namespace VKZ
     virtual bool activate( Context* context );
     virtual void deactivate();
 
-    virtual bool collect_descriptor_write( std::vector<VkWriteDescriptorSet>& writes );
+    virtual bool collect_descriptor_write( uint32_t swap_index, VkDescriptorSet& set,
+                                           std::vector<VkWriteDescriptorSet>& writes ) = 0;
+    virtual vkb::DispatchTable device_dispatch();
 
     virtual bool on_activate() { return true; }
     virtual void on_deactivate() {}
+
+    virtual void push_constants( VkCommandBuffer cmd, VkPipelineLayout layout ) {}
 
     virtual uint32_t swapchain_count();
   };
@@ -49,8 +53,9 @@ namespace VKZ
       buffers.resize( count );
       for (uint32_t i=0; i<count; ++i)
       {
-        buffers[i].create_uniform_buffer( context, sizeof(DataType) );
+        if ( !buffers[i].create_uniform_buffer(context, sizeof(DataType)) ) return false;
       }
+      return true;
     }
 
     void on_deactivate() override
@@ -62,25 +67,36 @@ namespace VKZ
       }
     }
 
-    bool collect_descriptor_write( std::vector<VkWriteDescriptorSet>& writes ) override
+    bool collect_descriptor_write( uint32_t swap_index, VkDescriptorSet& set,
+        std::vector<VkWriteDescriptorSet>& writes ) override
     {
-      /*
       VkDescriptorBufferInfo buffer_info = {};
-      buffer_info.buffer = buffers[i].vk_buffer;
+      buffer_info.buffer = buffers[swap_index].vk_buffer;
       buffer_info.offset = 0;
       buffer_info.range = sizeof(DataType);
 
       VkWriteDescriptorSet write;
       write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-      write.dstSet = descriptorSets[i];
-      write.dstBinding = 0;
+      write.dstSet = set;
+      write.dstBinding = binding;
       write.dstArrayElement = 0;
       write.descriptorCount = 1;
       write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
       write.pBufferInfo = &buffer_info;
-      */
+
+      writes.push_back( write );
 
       return true;
+    }
+
+    void push_constants( VkCommandBuffer cmd, VkPipelineLayout layout )
+    {
+      device_dispatch().cmdPushConstants( cmd, layout, stage, 0, sizeof(DataType), &value );
+    }
+
+    void set( DataType value )
+    {
+      memcpy( &this->value, &value, sizeof(DataType) );
     }
   };
 
@@ -102,10 +118,10 @@ namespace VKZ
     virtual bool activate( Context* context );
     virtual void deactivate();
 
-    virtual Descriptor* add_combined_image_sampler( uint32_t binding, VkShaderStageFlags stage,
-                                                    VkSampler* samplers, uint32_t count=1 );
-    virtual Descriptor* add_descriptor( uint32_t binding, VkDescriptorType type, VkShaderStageFlags stage,
-                                        VkSampler* samplers=nullptr, uint32_t count=1 );
+    //virtual Descriptor* add_combined_image_sampler( uint32_t binding, VkShaderStageFlags stage,
+    //                                                VkSampler* samplers, uint32_t count=1 );
+    //virtual Descriptor* add_descriptor( uint32_t binding, VkDescriptorType type, VkShaderStageFlags stage,
+    //                                    VkSampler* samplers=nullptr, uint32_t count=1 );
 
     template <typename DataType>
     UniformBufferDescriptor<DataType>* add_uniform_buffer( uint32_t binding, VkShaderStageFlags stage, uint32_t count=1 )
@@ -118,5 +134,14 @@ namespace VKZ
       descriptor_info.push_back( info );
       return info;
     }
+
+    virtual bool collect_descriptor_writes( uint32_t swap_index, std::vector<VkWriteDescriptorSet>& writes );
+
+    virtual Descriptor*& operator[]( size_t index )
+    {
+      return descriptor_info[index];
+    }
+
+    virtual void push_constants( VkCommandBuffer cmd, VkPipelineLayout layout );
   };
 };

@@ -8,7 +8,6 @@ namespace VKZ
   struct ConfigureGraphicsPipeline : ContextOperation<Context>
   {
     GraphicsPipeline* graphics_pipeline;
-    Descriptors*      descriptors = nullptr;
 
     std::vector<ShaderStageInfo*>   shader_stages;
     std::vector<VertexDescription*> vertex_descriptions;
@@ -41,6 +40,6 @@ namespace VKZ
     virtual void configure_rasterizer_info( VkPipelineRasterizationStateCreateInfo& rasterizer_info );
     virtual void configure_viewports_and_scissor_rects();
 
-    virtual void set_descriptors( Descriptors* descriptors ) { this->descriptors = descriptors; }
+    virtual void set_descriptors( Descriptors* descriptors ) { graphics_pipeline->descriptors = descriptors; }
   };
 };

@@ -2,6 +2,9 @@
 using namespace std;
 using namespace VKZ;
 
+//==============================================================================
+//  Descriptor
+//==============================================================================
 bool Descriptor::activate( Context* context )
 {
   if (activated) return true;
@@ -18,32 +21,9 @@ void Descriptor::deactivate()
   activated = false;
 }
 
-bool Descriptor::collect_descriptor_write( std::vector<VkWriteDescriptorSet>& writes )
+vkb::DispatchTable Descriptor::device_dispatch()
 {
-  /*
-  if (type == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-  {
-    VkDescriptorImageInfo imageInfo = {};
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = textureImageView;
-    imageInfo.sampler = textureSampler;
-
-    descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrites[1].dstSet = descriptorSets[i];
-    descriptorWrites[1].dstBinding = 1;
-    descriptorWrites[1].dstArrayElement = 0;
-    descriptorWrites[1].descriptorCount = 1;
-    descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorWrites[1].pImageInfo = &imageInfo;
-
-    return true;
-  }
-  else
-  */
-  {
-    VKZ_LOG_ERROR( "[Vulkanize] Internal error - unhandled type in Descriptor::collect_descriptor_write().\n" );
-    return false;
-  }
+  return context->device_dispatch;
 }
 
 uint32_t Descriptor::swapchain_count()
@@ -51,6 +31,9 @@ uint32_t Descriptor::swapchain_count()
   return context->swapchain_count;
 }
 
+//==============================================================================
+//  Descriptors
+//==============================================================================
 Descriptors::~Descriptors()
 {
   for (Descriptor* info : descriptor_info)
@@ -81,24 +64,41 @@ void Descriptors::deactivate()
   for (auto descriptor : descriptor_info) descriptor->deactivate();
 }
 
-Descriptor* Descriptors::add_combined_image_sampler( uint32_t binding, VkShaderStageFlags stage,
-    VkSampler* samplers, uint32_t count )
+//Descriptor* Descriptors::add_combined_image_sampler( uint32_t binding, VkShaderStageFlags stage,
+//    VkSampler* samplers, uint32_t count )
+//{
+//  return add_descriptor(
+//    binding, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage, samplers, count
+//  );
+//}
+//
+//Descriptor* Descriptors::add_descriptor( uint32_t binding, VkDescriptorType type, VkShaderStageFlags stage,
+//    VkSampler* samplers, uint32_t count )
+//{
+//  Descriptor* info = new Descriptor();
+//  info->binding  = binding;
+//  info->count    = count;
+//  info->type     = type;
+//  info->stage    = stage;
+//  info->samplers = samplers;
+//  descriptor_info.push_back( info );
+//  return info;
+//}
+
+bool Descriptors::collect_descriptor_writes( uint32_t swap_index, vector<VkWriteDescriptorSet>& writes )
 {
-  return add_descriptor(
-    binding, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, stage, samplers, count
-  );
+  writes.reserve( descriptor_info.size() );
+  for (Descriptor* info : descriptor_info)
+  {
+    if ( !info->collect_descriptor_write( swap_index, sets[swap_index], writes ) ) return false;
+  }
+  return true;
 }
 
-Descriptor* Descriptors::add_descriptor( uint32_t binding, VkDescriptorType type, VkShaderStageFlags stage,
-    VkSampler* samplers, uint32_t count )
+void Descriptors::push_constants( VkCommandBuffer cmd, VkPipelineLayout layout )
 {
-  Descriptor* info = new Descriptor();
-  info->binding  = binding;
-  info->count    = count;
-  info->type     = type;
-  info->stage    = stage;
-  info->samplers = samplers;
-  descriptor_info.push_back( info );
-  return info;
+  for (Descriptor* info : descriptor_info)
+  {
+    info->push_constants( cmd, layout );
+  }
 }
-

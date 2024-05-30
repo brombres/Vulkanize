@@ -76,55 +76,13 @@ bool ConfigureDescriptors::on_activate()
     return false;
   );
 
-  /*
   for (uint32_t i=0; i<swapchain_count; ++i)
   {
     vector<VkWriteDescriptorSet> descriptor_writes;
-
-    VkDescriptorBufferInfo bufferInfo = {};
-    bufferInfo.buffer = uniformBuffers[i];
-    bufferInfo.offset = 0;
-    bufferInfo.range = sizeof(UniformBufferObject);
-
-    VkDescriptorImageInfo imageInfo = {};
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = textureImageView;
-    imageInfo.sampler = textureSampler;
-
-    VkDescriptorImageInfo imageInfo2 = {};
-    imageInfo2.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo2.imageView = textureImageView2;
-    imageInfo2.sampler = textureSampler2;
-
-    std::array<VkWriteDescriptorSet, 3> descriptorWrites = {};
-
-    descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrites[0].dstSet = descriptorSets[i];
-    descriptorWrites[0].dstBinding = 0;
-    descriptorWrites[0].dstArrayElement = 0;
-    descriptorWrites[0].descriptorCount = 1;
-    descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    descriptorWrites[0].pBufferInfo = &bufferInfo;
-
-    descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrites[1].dstSet = descriptorSets[i];
-    descriptorWrites[1].dstBinding = 1;
-    descriptorWrites[1].dstArrayElement = 0;
-    descriptorWrites[1].descriptorCount = 1;
-    descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorWrites[1].pImageInfo = &imageInfo;
-
-    descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptorWrites[2].dstSet = descriptorSets[i];
-    descriptorWrites[2].dstBinding = 2;
-    descriptorWrites[2].dstArrayElement = 0;
-    descriptorWrites[2].descriptorCount = 1;
-    descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorWrites[2].pImageInfo = &imageInfo2;
-
-    vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+    if ( !descriptors->collect_descriptor_writes(i, descriptor_writes) ) return false;
+    context->device_dispatch.updateDescriptorSets( (uint32_t)descriptor_writes.size(),
+        descriptor_writes.data(), 0, nullptr );
   }
-  */
 
   progress = 5;
 

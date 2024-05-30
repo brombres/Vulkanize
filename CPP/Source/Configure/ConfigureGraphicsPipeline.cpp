@@ -205,10 +205,10 @@ void ConfigureGraphicsPipeline::configure_pipeline_layout_info( VkPipelineLayout
   pipeline_layout_info.setLayoutCount = 0;
   pipeline_layout_info.pushConstantRangeCount = 0;
 
-  if (descriptors)
+  if (graphics_pipeline->descriptors)
   {
     pipeline_layout_info.setLayoutCount = 1;
-    pipeline_layout_info.pSetLayouts = &descriptors->layout;
+    pipeline_layout_info.pSetLayouts = &graphics_pipeline->descriptors->layout;
   }
 }
 

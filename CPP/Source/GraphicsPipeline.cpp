@@ -5,6 +5,13 @@ using namespace VKZ;
 void GraphicsPipeline::cmd_bind( VkCommandBuffer cmd )
 {
   context->device_dispatch.cmdBindPipeline( cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_pipeline );
+
+  if (descriptors)
+  {
+    descriptors->push_constants( cmd, layout );
+    context->device_dispatch.cmdBindDescriptorSets( cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+        layout, 0, 1, &descriptors->sets[context->swap_index], 0, nullptr );
+  }
 }
 
 void GraphicsPipeline::cmd_set_default_viewports_and_scissor_rects( VkCommandBuffer cmd )
