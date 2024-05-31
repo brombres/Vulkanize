@@ -8,7 +8,6 @@ void GraphicsPipeline::cmd_bind( VkCommandBuffer cmd )
 
   if (descriptors)
   {
-    descriptors->push_constants( cmd, layout );
     context->device_dispatch.cmdBindDescriptorSets( cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
         layout, 0, 1, &descriptors->sets[context->swap_index], 0, nullptr );
   }

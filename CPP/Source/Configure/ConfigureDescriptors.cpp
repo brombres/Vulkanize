@@ -80,8 +80,6 @@ bool ConfigureDescriptors::on_activate()
   {
     vector<VkWriteDescriptorSet> descriptor_writes;
     if ( !descriptors->collect_descriptor_writes(i, descriptor_writes) ) return false;
-    context->device_dispatch.updateDescriptorSets( (uint32_t)descriptor_writes.size(),
-        descriptor_writes.data(), 0, nullptr );
   }
 
   progress = 5;

@@ -95,10 +95,3 @@ bool Descriptors::collect_descriptor_writes( uint32_t swap_index, vector<VkWrite
   return true;
 }
 
-void Descriptors::push_constants( VkCommandBuffer cmd, VkPipelineLayout layout )
-{
-  for (Descriptor* info : descriptor_info)
-  {
-    info->push_constants( cmd, layout );
-  }
-}
