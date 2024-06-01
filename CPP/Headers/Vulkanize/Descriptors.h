@@ -25,14 +25,10 @@ namespace VKZ
     virtual bool activate( Context* context );
     virtual void deactivate();
 
-    virtual bool collect_descriptor_write( uint32_t swap_index, VkDescriptorSet& set,
-                                           std::vector<VkWriteDescriptorSet>& writes ) = 0;
-    virtual vkb::DispatchTable device_dispatch();
+    virtual bool configure_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) = 0;
 
     virtual bool on_activate() { return true; }
     virtual void on_deactivate() {}
-
-    virtual uint32_t swapchain_count();
   };
 
   template <typename DataType>
@@ -47,7 +43,7 @@ namespace VKZ
 
     bool on_activate() override
     {
-      uint32_t count = swapchain_count();
+      uint32_t count = context->swapchain_count;
       buffers.resize( count );
       for (uint32_t i=0; i<count; ++i)
       {
@@ -60,15 +56,14 @@ namespace VKZ
 
     void on_deactivate() override
     {
-      uint32_t count = swapchain_count();
+      uint32_t count = context->swapchain_count;
       for (uint32_t i=0; i<count; ++i)
       {
         buffers[i].destroy();
       }
     }
 
-    bool collect_descriptor_write( uint32_t swap_index, VkDescriptorSet& set,
-        std::vector<VkWriteDescriptorSet>& writes ) override
+    bool configure_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) override
     {
       VkDescriptorBufferInfo buffer_info = {};
       buffer_info.buffer = buffers[swap_index].vk_buffer;
@@ -84,9 +79,7 @@ namespace VKZ
       write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
       write.pBufferInfo = &buffer_info;
 
-      device_dispatch().updateDescriptorSets( 1, &write, 0, nullptr );
-
-      writes.push_back( write );
+      context->device_dispatch.updateDescriptorSets( 1, &write, 0, nullptr );
 
       return true;
     }
@@ -106,7 +99,7 @@ namespace VKZ
   {
     // PROPERTIES
     Context*                 context = nullptr;
-    std::vector<Descriptor*> descriptor_info;
+    std::vector<Descriptor*> descriptors;
 
     VkDescriptorSetLayout        layout;
     VkDescriptorPool             pool;
@@ -128,21 +121,20 @@ namespace VKZ
     template <typename DataType>
     UniformBufferDescriptor<DataType>* add_uniform_buffer( uint32_t binding, VkShaderStageFlags stage, uint32_t count=1 )
     {
-      UniformBufferDescriptor<DataType>* info = new UniformBufferDescriptor<DataType>();
-      info->binding  = binding;
-      info->count    = count;
-      info->type     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-      info->stage    = stage;
-      descriptor_info.push_back( info );
-      return info;
+      UniformBufferDescriptor<DataType>* descriptor = new UniformBufferDescriptor<DataType>();
+      descriptor->binding  = binding;
+      descriptor->count    = count;
+      descriptor->type     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+      descriptor->stage    = stage;
+      descriptors.push_back( descriptor );
+      return descriptor;
     }
 
-    virtual bool collect_descriptor_writes( uint32_t swap_index,
-        std::vector<VkWriteDescriptorSet>& writes );
+    virtual bool configure_descriptor_sets( uint32_t swap_index );
 
     virtual Descriptor*& operator[]( size_t index )
     {
-      return descriptor_info[index];
+      return descriptors[index];
     }
   };
 };

@@ -88,7 +88,6 @@ namespace VKZ
 	}
 
 #include "Vulkanize/Buffer.h"
-#include "Vulkanize/Descriptors.h"
 #include "Vulkanize/ShaderStageInfo.h"
 #include "Vulkanize/Image.h"
 #include "Vulkanize/VertexDescription.h"
@@ -99,6 +98,7 @@ namespace VKZ
 #include "Vulkanize/ContextOperation.h"
 #include "Vulkanize/Process.h"
 #include "Vulkanize/Context.h"
+#include "Vulkanize/Descriptors.h"
 #include "Vulkanize/Configure/ConfigureDevice.h"
 #include "Vulkanize/Configure/ConfigureFormats.h"
 #include "Vulkanize/Configure/ConfigureSurfaceSize.h"

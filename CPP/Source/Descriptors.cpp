@@ -21,26 +21,16 @@ void Descriptor::deactivate()
   activated = false;
 }
 
-vkb::DispatchTable Descriptor::device_dispatch()
-{
-  return context->device_dispatch;
-}
-
-uint32_t Descriptor::swapchain_count()
-{
-  return context->swapchain_count;
-}
-
 //==============================================================================
 //  Descriptors
 //==============================================================================
 Descriptors::~Descriptors()
 {
-  for (Descriptor* info : descriptor_info)
+  for (Descriptor* descriptor : descriptors)
   {
-    delete info;
+    delete descriptor;
   }
-  descriptor_info.clear();
+  descriptors.clear();
 }
 
 bool Descriptors::activate( Context* context )
@@ -48,7 +38,7 @@ bool Descriptors::activate( Context* context )
   if (activated) return true;
   this->context = context;
 
-  for (auto descriptor : descriptor_info)
+  for (auto descriptor : descriptors)
   {
     if ( !descriptor->activate(context) ) return false;
   }
@@ -61,7 +51,7 @@ bool Descriptors::activate( Context* context )
 void Descriptors::deactivate()
 {
   if ( !activated ) return;
-  for (auto descriptor : descriptor_info) descriptor->deactivate();
+  for (auto descriptor : descriptors) descriptor->deactivate();
 }
 
 //Descriptor* Descriptors::add_combined_image_sampler( uint32_t binding, VkShaderStageFlags stage,
@@ -75,22 +65,21 @@ void Descriptors::deactivate()
 //Descriptor* Descriptors::add_descriptor( uint32_t binding, VkDescriptorType type, VkShaderStageFlags stage,
 //    VkSampler* samplers, uint32_t count )
 //{
-//  Descriptor* info = new Descriptor();
-//  info->binding  = binding;
-//  info->count    = count;
-//  info->type     = type;
-//  info->stage    = stage;
-//  info->samplers = samplers;
-//  descriptor_info.push_back( info );
-//  return info;
+//  Descriptor* descriptor = new Descriptor();
+//  descriptor->binding  = binding;
+//  descriptorcount    = count;
+//  descriptor->type     = type;
+//  descriptor->stage    = stage;
+//  descriptor->samplers = samplers;
+//  descriptors.push_back( descriptor );
+//  return descriptor;
 //}
 
-bool Descriptors::collect_descriptor_writes( uint32_t swap_index, vector<VkWriteDescriptorSet>& writes )
+bool Descriptors::configure_descriptor_sets( uint32_t swap_index )
 {
-  writes.reserve( descriptor_info.size() );
-  for (Descriptor* info : descriptor_info)
+  for (Descriptor* descriptor : descriptors)
   {
-    if ( !info->collect_descriptor_write( swap_index, sets[swap_index], writes ) ) return false;
+    if ( !descriptor->configure_descriptor_set(swap_index, sets[swap_index]) ) return false;
   }
   return true;
 }

@@ -4,6 +4,8 @@
 
 namespace VKZ
 {
+  struct Descriptors;
+
   struct GraphicsPipeline
   {
     Context*         context;

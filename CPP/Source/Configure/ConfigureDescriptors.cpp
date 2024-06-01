@@ -4,13 +4,13 @@ using namespace VKZ;
 
 bool ConfigureDescriptors::on_activate()
 {
-  for (auto descriptor : descriptors->descriptor_info)
+  for (auto descriptor : descriptors->descriptors)
   {
     if ( !descriptor->activate(context) ) return false;
   }
   progress = 1;
 
-  for (Descriptor* info : descriptors->descriptor_info)
+  for (Descriptor* info : descriptors->descriptors)
   {
     VkDescriptorSetLayoutBinding layout_binding = {};
     layout_binding.binding = info->binding;
@@ -37,7 +37,7 @@ bool ConfigureDescriptors::on_activate()
 
   // Descriptor Pool
   uint32_t swapchain_count = context->swapchain_count;
-  for (Descriptor* info : descriptors->descriptor_info)
+  for (Descriptor* info : descriptors->descriptors)
   {
     VkDescriptorPoolSize pool_size = {};
     pool_size.type = info->type;
@@ -78,8 +78,7 @@ bool ConfigureDescriptors::on_activate()
 
   for (uint32_t i=0; i<swapchain_count; ++i)
   {
-    vector<VkWriteDescriptorSet> descriptor_writes;
-    if ( !descriptors->collect_descriptor_writes(i, descriptor_writes) ) return false;
+    if ( !descriptors->configure_descriptor_sets(i) ) return false;
   }
 
   progress = 5;
@@ -94,7 +93,7 @@ void ConfigureDescriptors::on_deactivate()
 
   if (progress >= 1)
   {
-    for (auto descriptor : descriptors->descriptor_info) descriptor->deactivate();
+    for (auto descriptor : descriptors->descriptors) descriptor->deactivate();
   }
 
   pool_sizes.clear();
