@@ -7,6 +7,7 @@ namespace VKZ
 {
   struct ConfigureGraphicsPipeline : ContextOperation<Context>
   {
+    // PROPERTIES
     GraphicsPipeline* graphics_pipeline;
 
     std::vector<ShaderStageInfo*>   shader_stages;
@@ -21,6 +22,7 @@ namespace VKZ
 
     VkPipelineColorBlendAttachmentState color_blend_attachment = {};
 
+    // METHODS
     ConfigureGraphicsPipeline( GraphicsPipeline* graphics_pipeline );
     virtual ~ConfigureGraphicsPipeline();
 
