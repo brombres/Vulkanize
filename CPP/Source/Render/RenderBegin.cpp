@@ -36,7 +36,7 @@ bool RenderBegin::on_execute()
   context->vertex_buffer  = &context->vertex_buffers[ context->swap_index ];
 
   context->cmd = context->command_buffers[ context->swap_index ];
-  context->prepare_command_buffer( context->cmd );
+  context->reset_cmd( context->cmd );
 
   VkClearColorValue clear_color = { 0.0f, 0.0f, 1.0f, 1.0f };
   VkClearDepthStencilValue clear_depth_stencil = { 1.0f, 0 };

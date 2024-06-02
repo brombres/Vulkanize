@@ -90,14 +90,13 @@ int Context::find_memory_type( uint32_t typeFilter, VkMemoryPropertyFlags proper
   return -1;
 }
 
-void Context::prepare_command_buffer( VkCommandBuffer cmd, VkCommandBufferUsageFlagBits usage_flags,
-    VkCommandBufferResetFlagBits reset_flags )
+void Context::reset_cmd( VkCommandBuffer cmd )
 {
-  device_dispatch.resetCommandBuffer( cmd, reset_flags );
+  device_dispatch.resetCommandBuffer( cmd, (VkCommandBufferResetFlagBits)0 );
 
   VkCommandBufferBeginInfo begin_info = {};
   begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-  begin_info.flags = usage_flags;
+  begin_info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
   device_dispatch.beginCommandBuffer( cmd, &begin_info );
 }
 
@@ -114,3 +113,39 @@ void Context::set_operation( std::string phase, Operation* operation )
   if (operation) operation->set_context( this );
   Process::set_operation( phase, operation );
 }
+
+VkCommandBuffer Context::begin_cmd()
+{
+  VkCommandBufferAllocateInfo alloc_info = {};
+  alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+  alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+  alloc_info.commandPool = command_pool;
+  alloc_info.commandBufferCount = 1;
+
+  VkCommandBuffer cmd;
+  device_dispatch.allocateCommandBuffers( &alloc_info, &cmd );
+
+  VkCommandBufferBeginInfo begin_info = {};
+  begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+  device_dispatch.beginCommandBuffer( cmd, &begin_info );
+
+  return cmd;
+}
+
+void Context::end_cmd( VkCommandBuffer cmd )
+{
+  device_dispatch.endCommandBuffer( cmd );
+
+  VkSubmitInfo submitInfo{};
+  submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+  submitInfo.commandBufferCount = 1;
+  submitInfo.pCommandBuffers = &cmd;
+
+  device_dispatch.queueSubmit( graphics_queue, 1, &submitInfo, VK_NULL_HANDLE );
+  device_dispatch.queueWaitIdle( graphics_queue );
+
+  device_dispatch.freeCommandBuffers( command_pool, 1, &cmd );
+}
+

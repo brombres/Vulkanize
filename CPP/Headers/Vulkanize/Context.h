@@ -27,7 +27,7 @@ namespace VKZ
     bool                       swapchain_created = false;
 	  std::vector<VkImage>       swapchain_images;
     std::vector<VkImageView>   swapchain_image_views;
-    VKZ::Image                 depth_stencil;
+    Image                      depth_stencil;
     std::vector<VkFramebuffer> framebuffers;
     uint32_t                   swapchain_count = 0;
 
@@ -65,10 +65,11 @@ namespace VKZ
     virtual void add_operation( std::string phase, Operation* operation );
     virtual void destroy();
     virtual int  find_memory_type( uint32_t typeFilter, VkMemoryPropertyFlags properties );
-    virtual void prepare_command_buffer( VkCommandBuffer cmd,
-        VkCommandBufferUsageFlagBits usage_flags=VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT,
-        VkCommandBufferResetFlagBits reset_flags=(VkCommandBufferResetFlagBits)0 );
+    virtual void reset_cmd( VkCommandBuffer cmd );
     virtual void recreate_swapchain();
     virtual void set_operation( std::string phase, Operation* operation );
+
+    virtual VkCommandBuffer begin_cmd();         // creates and returns a single-use command buffer
+    virtual void end_cmd( VkCommandBuffer cmd ); // submits a single-use command buffer
   };
 };
