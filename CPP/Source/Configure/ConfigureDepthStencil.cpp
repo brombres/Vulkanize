@@ -11,8 +11,7 @@ bool ConfigureDepthStencil::on_activate()
     return false;
   }
 
-  context->depth_stencil.create(
-    context,
+  ImageInfo info(
     context->surface_size.width,
     context->surface_size.height,
     depth_format,
@@ -20,6 +19,8 @@ bool ConfigureDepthStencil::on_activate()
     VK_IMAGE_ASPECT_DEPTH_BIT,
     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
   );
+
+  context->depth_stencil.create( context, info );
 
   return true;
 }

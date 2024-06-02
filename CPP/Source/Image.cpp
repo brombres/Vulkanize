@@ -2,27 +2,30 @@
 
 using namespace VKZ;
 
-Image::Image() {}
-
-Image::Image( Context* context, int width, int height, VkFormat format,
-              VkImageUsageFlags usage, VkImageAspectFlags aspect,
-              VkMemoryPropertyFlags properties, VkImageTiling tiling )
+//==============================================================================
+// ImageInfo
+//==============================================================================
+ImageInfo::ImageInfo()
 {
-  create( context, width, height, format, usage, aspect, properties, tiling );
+  configure(
+    0, 0, VK_FORMAT_R8G8B8A8_SRGB,
+    VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+    VK_IMAGE_ASPECT_COLOR_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+    VK_IMAGE_TILING_OPTIMAL
+  );
 }
 
-Image::~Image()
+ImageInfo::ImageInfo( int width, int height, VkFormat format,
+                      VkImageUsageFlags usage, VkImageAspectFlags aspect,
+                      VkMemoryPropertyFlags memory_properties, VkImageTiling tiling )
 {
-  destroy();
+  configure( width, height, format, usage, aspect, memory_properties, tiling );
 }
 
-bool Image::create( Context* context, int width, int height, VkFormat format,
-                    VkImageUsageFlags usage, VkImageAspectFlags aspect,
-                    VkMemoryPropertyFlags properties, VkImageTiling tiling )
+void ImageInfo::configure( int width, int height, VkFormat format,
+                           VkImageUsageFlags usage, VkImageAspectFlags aspect,
+                           VkMemoryPropertyFlags memory_properties, VkImageTiling tiling )
 {
-  this->context = context;
-  this->format = format;
-  VkImageCreateInfo image_info = {};
   image_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
   image_info.imageType = VK_IMAGE_TYPE_2D;
   image_info.extent.width = width;
@@ -37,9 +40,41 @@ bool Image::create( Context* context, int width, int height, VkFormat format,
   image_info.samples = VK_SAMPLE_COUNT_1_BIT;
   image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
+  this->memory_properties = memory_properties;
+
+  view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+  view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+  view_info.format = format;
+  view_info.subresourceRange.aspectMask = aspect;
+  view_info.subresourceRange.baseMipLevel = 0;
+  view_info.subresourceRange.levelCount = 1;
+  view_info.subresourceRange.baseArrayLayer = 0;
+  view_info.subresourceRange.layerCount = 1;
+}
+
+//==============================================================================
+// Image
+//==============================================================================
+Image::Image() {}
+
+Image::Image( Context* context, ImageInfo& info )
+{
+  create( context, info );
+}
+
+Image::~Image()
+{
+  destroy();
+}
+
+bool Image::create( Context* context, ImageInfo& info )
+{
+  this->context = context;
+  this->format = info.image_info.format;
+
   VKZ_ATTEMPT(
     "creating image",
-    context->device_dispatch.createImage( &image_info, nullptr, &image ),
+    context->device_dispatch.createImage( &info.image_info, nullptr, &image ),
     return false;
   )
   image_created = true;
@@ -47,7 +82,9 @@ bool Image::create( Context* context, int width, int height, VkFormat format,
   VkMemoryRequirements memory_requirements;
   context->device_dispatch.getImageMemoryRequirements( image, &memory_requirements );
 
-  int memory_type_index = context->find_memory_type( memory_requirements.memoryTypeBits, properties );
+  int memory_type_index = context->find_memory_type(
+    memory_requirements.memoryTypeBits, info.memory_properties
+  );
 
   VkMemoryAllocateInfo alloc_info = {};
   alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -64,20 +101,10 @@ bool Image::create( Context* context, int width, int height, VkFormat format,
 
   context->device_dispatch.bindImageMemory( image, memory, 0 );
 
-  VkImageViewCreateInfo view_info = {};
-  view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-  view_info.image = image;
-  view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-  view_info.format = format;
-  view_info.subresourceRange.aspectMask = aspect;
-  view_info.subresourceRange.baseMipLevel = 0;
-  view_info.subresourceRange.levelCount = 1;
-  view_info.subresourceRange.baseArrayLayer = 0;
-  view_info.subresourceRange.layerCount = 1;
-
+  info.view_info.image = image;
   VKZ_ATTEMPT(
     "creating image view",
-    context->device_dispatch.createImageView( &view_info, nullptr, &view ),
+    context->device_dispatch.createImageView( &info.view_info, nullptr, &view ),
     destroy();
     return false;
   );

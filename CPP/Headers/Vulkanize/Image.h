@@ -7,6 +7,27 @@ namespace VKZ
 {
   struct Context;
 
+  struct ImageInfo
+  {
+    // PROPERTIES
+    VkImageCreateInfo     image_info = {};
+    VkMemoryPropertyFlags memory_properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    VkImageViewCreateInfo view_info = {};
+
+    // METHODS
+    ImageInfo();
+
+    ImageInfo( int width, int height, VkFormat format,
+               VkImageUsageFlags usage, VkImageAspectFlags aspect,
+               VkMemoryPropertyFlags memory_properties=VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+               VkImageTiling tiling=VK_IMAGE_TILING_OPTIMAL );
+
+    virtual void configure( int width, int height, VkFormat format,
+                            VkImageUsageFlags usage, VkImageAspectFlags aspect,
+                            VkMemoryPropertyFlags memory_properties=VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                            VkImageTiling tiling=VK_IMAGE_TILING_OPTIMAL );
+  };
+
   struct Image
   {
     Context*       context;
@@ -20,16 +41,10 @@ namespace VKZ
     bool           exists = false;
 
     Image();
-    Image( Context* context, int width, int height, VkFormat format,
-           VkImageUsageFlags usage, VkImageAspectFlags aspect,
-           VkMemoryPropertyFlags properties=VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-           VkImageTiling tiling=VK_IMAGE_TILING_OPTIMAL );
+    Image( Context* context, ImageInfo& info );
     ~Image();
 
-    bool create( Context* context, int width, int height, VkFormat format,
-                 VkImageUsageFlags usage, VkImageAspectFlags aspect,
-                 VkMemoryPropertyFlags properties=VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                 VkImageTiling tiling=VK_IMAGE_TILING_OPTIMAL );
-    void destroy();
+    virtual bool create( Context* context, ImageInfo& info );
+    virtual void destroy();
   };
 };
