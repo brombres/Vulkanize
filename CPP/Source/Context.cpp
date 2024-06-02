@@ -116,6 +116,7 @@ void Context::set_operation( std::string phase, Operation* operation )
 
 VkCommandBuffer Context::begin_cmd()
 {
+  // TODO: Use a separate command pool with VK_COMMAND_POOL_CREATE_TRANSIENT_BIT?
   VkCommandBufferAllocateInfo alloc_info = {};
   alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
   alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;

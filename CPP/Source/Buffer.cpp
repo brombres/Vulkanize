@@ -117,21 +117,7 @@ bool Buffer::copy_from( Buffer* src, uint32_t src_index, uint32_t n, uint32_t de
   if ( !ensure_capacity( dest_index + n ) )     return false;
   if ( !(src->is_ready() && this->is_ready()) ) return false;
 
-  // We may want to use a separate command pool with VK_COMMAND_POOL_CREATE_TRANSIENT_BIT
-  VkCommandBufferAllocateInfo alloc_info = {};
-  alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-  alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-  alloc_info.commandPool = context->command_pool;
-  alloc_info.commandBufferCount = 1;
-
-  VkCommandBuffer cmd;
-  context->device_dispatch.allocateCommandBuffers( &alloc_info, &cmd );
-
-  VkCommandBufferBeginInfo begin_info = {};
-  begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-  begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-  context->device_dispatch.beginCommandBuffer( cmd, &begin_info );
+  VkCommandBuffer cmd = context->begin_cmd();
 
   VkBufferCopy copy_info = {};
   copy_info.srcOffset = src_index;
@@ -139,17 +125,7 @@ bool Buffer::copy_from( Buffer* src, uint32_t src_index, uint32_t n, uint32_t de
   copy_info.size = element_size * n;
   context->device_dispatch.cmdCopyBuffer( cmd, src->vk_buffer, vk_buffer, 1, &copy_info );
 
-  context->device_dispatch.endCommandBuffer( cmd );
-
-  VkSubmitInfo submit_info{};
-  submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-  submit_info.commandBufferCount = 1;
-  submit_info.pCommandBuffers = &cmd;
-
-  context->device_dispatch.queueSubmit( context->graphics_queue, 1, &submit_info, VK_NULL_HANDLE );
-  context->device_dispatch.queueWaitIdle( context->graphics_queue );
-
-  context->device_dispatch.freeCommandBuffers( context->command_pool, 1, &cmd );
+  context->end_cmd( cmd );
 
   if (count < dest_index + n) count = dest_index + n;
 
