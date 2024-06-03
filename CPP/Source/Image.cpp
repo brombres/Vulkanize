@@ -70,17 +70,20 @@ Image::~Image()
 bool Image::create( Context* context, ImageInfo& info )
 {
   this->context = context;
-  this->format = info.image_info.format;
+  this->format  = info.image_info.format;
+  this->layout  = info.image_info.initialLayout;
+  this->width   = info.image_info.extent.width;
+  this->height  = info.image_info.extent.height;
 
   VKZ_ATTEMPT(
     "creating image",
-    context->device_dispatch.createImage( &info.image_info, nullptr, &image ),
+    context->device_dispatch.createImage( &info.image_info, nullptr, &vk_image ),
     return false;
   )
   image_created = true;
 
   VkMemoryRequirements memory_requirements;
-  context->device_dispatch.getImageMemoryRequirements( image, &memory_requirements );
+  context->device_dispatch.getImageMemoryRequirements( vk_image, &memory_requirements );
 
   int memory_type_index = context->find_memory_type(
     memory_requirements.memoryTypeBits, info.memory_properties
@@ -93,18 +96,18 @@ bool Image::create( Context* context, ImageInfo& info )
 
   VKZ_ATTEMPT(
     "allocating image memory",
-    context->device_dispatch.allocateMemory( &alloc_info, nullptr, &memory ),
+    context->device_dispatch.allocateMemory( &alloc_info, nullptr, &vk_memory ),
     destroy();
     return false;
   );
   memory_allocated = true;
 
-  context->device_dispatch.bindImageMemory( image, memory, 0 );
+  context->device_dispatch.bindImageMemory( vk_image, vk_memory, 0 );
 
-  info.view_info.image = image;
+  info.view_info.image = vk_image;
   VKZ_ATTEMPT(
     "creating image view",
-    context->device_dispatch.createImageView( &info.view_info, nullptr, &view ),
+    context->device_dispatch.createImageView( &info.view_info, nullptr, &vk_view ),
     destroy();
     return false;
   );
@@ -119,21 +122,106 @@ void Image::destroy()
   if (view_created)
   {
     view_created = false;
-    context->device_dispatch.destroyImageView( view, nullptr );
+    context->device_dispatch.destroyImageView( vk_view, nullptr );
   }
 
   if (memory_allocated)
   {
     memory_allocated = false;
-    context->device_dispatch.freeMemory( memory, nullptr );
+    context->device_dispatch.freeMemory( vk_memory, nullptr );
   }
 
   if (image_created)
   {
     image_created = false;
-    context->device_dispatch.destroyImage( image, nullptr );
+    context->device_dispatch.destroyImage( vk_image, nullptr );
   }
 
   exists = false;
 }
 
+void Image::copy_from( Buffer& buffer )
+{
+  VkCommandBuffer cmd = context->begin_cmd();
+
+  VkBufferImageCopy region = {};
+  region.bufferOffset = 0;
+  region.bufferRowLength = 0;
+  region.bufferImageHeight = 0;
+
+  region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  region.imageSubresource.mipLevel = 0;
+  region.imageSubresource.baseArrayLayer = 0;
+  region.imageSubresource.layerCount = 1;
+
+  region.imageOffset = { 0, 0, 0 };
+  region.imageExtent = { width, height, 1 };
+
+  context->device_dispatch.cmdCopyBufferToImage(
+    cmd,
+    buffer.vk_buffer,
+    vk_image,
+    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+    1,
+    &region
+  );
+
+  context->end_cmd( cmd );
+}
+
+void Image::transition_layout( VkImageLayout new_layout )
+{
+  VkImageMemoryBarrier barrier{};
+  barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+  barrier.oldLayout = layout;
+  barrier.newLayout = new_layout;
+  barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+  barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+  barrier.image = vk_image;
+  barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  barrier.subresourceRange.baseMipLevel = 0;
+  barrier.subresourceRange.levelCount = 1;
+  barrier.subresourceRange.baseArrayLayer = 0;
+  barrier.subresourceRange.layerCount = 1;
+
+  VkPipelineStageFlags src_stage;
+  VkPipelineStageFlags dest_stage;
+
+  if (layout == VK_IMAGE_LAYOUT_UNDEFINED && new_layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+  {
+    barrier.srcAccessMask = 0;
+    barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+    src_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+    dest_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+  }
+  else if (layout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+           new_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+  {
+    barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+    src_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    dest_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+  }
+  else
+  {
+    VKZ_LOG_ERROR( "[Vulkanize] Error - unsupported layout transition." );
+    return;
+  }
+
+  VkCommandBuffer cmd = context->begin_cmd();
+
+  context->device_dispatch.cmdPipelineBarrier(
+    cmd,
+    src_stage, dest_stage,
+    0,
+    0, nullptr,
+    0, nullptr,
+    1, &barrier
+  );
+
+  context->end_cmd( cmd );
+
+  layout = new_layout;
+}

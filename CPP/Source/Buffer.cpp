@@ -51,12 +51,12 @@ bool Buffer::create( Context* context, uint32_t element_size, uint32_t initial_c
 
   VKZ_ATTEMPT(
     "allocating memory for buffer",
-    context->device_dispatch.allocateMemory( &alloc_info, nullptr, &memory),
+    context->device_dispatch.allocateMemory( &alloc_info, nullptr, &vk_memory),
     destroy(); return false;
   );
   allocation_stage = 2;
 
-  context->device_dispatch.bindBufferMemory( vk_buffer, memory, 0 );
+  context->device_dispatch.bindBufferMemory( vk_buffer, vk_memory, 0 );
   return true;
 }
 
@@ -107,15 +107,15 @@ bool Buffer::create_vertex_buffer( Context* context, uint32_t element_size, uint
   );
 }
 
-bool Buffer::copy_from( Buffer* src )
+bool Buffer::copy_from( Buffer& src )
 {
-  return copy_from( src, 0, src->count, 0 );
+  return copy_from( src, 0, src.count, 0 );
 }
 
-bool Buffer::copy_from( Buffer* src, uint32_t src_index, uint32_t n, uint32_t dest_index )
+bool Buffer::copy_from( Buffer& src, uint32_t src_index, uint32_t n, uint32_t dest_index )
 {
   if ( !ensure_capacity( dest_index + n ) )     return false;
-  if ( !(src->is_ready() && this->is_ready()) ) return false;
+  if ( !(src.is_ready() && this->is_ready()) ) return false;
 
   VkCommandBuffer cmd = context->begin_cmd();
 
@@ -123,7 +123,7 @@ bool Buffer::copy_from( Buffer* src, uint32_t src_index, uint32_t n, uint32_t de
   copy_info.srcOffset = src_index;
   copy_info.dstOffset = dest_index;
   copy_info.size = element_size * n;
-  context->device_dispatch.cmdCopyBuffer( cmd, src->vk_buffer, vk_buffer, 1, &copy_info );
+  context->device_dispatch.cmdCopyBuffer( cmd, src.vk_buffer, vk_buffer, 1, &copy_info );
 
   context->end_cmd( cmd );
 
@@ -158,7 +158,7 @@ void Buffer::destroy()
 {
   unmap();
   if (allocation_stage >= 2) context->device_dispatch.destroyBuffer( vk_buffer, nullptr );
-  if (allocation_stage >= 1) context->device_dispatch.freeMemory( memory, nullptr );
+  if (allocation_stage >= 1) context->device_dispatch.freeMemory( vk_memory, nullptr );
   allocation_stage = 0;
 }
 
@@ -183,7 +183,7 @@ void* Buffer::map( uint32_t index, uint32_t element_count )
 
   if (element_count == -1) element_count = capacity - index;
 
-  context->device_dispatch.mapMemory( memory, index*element_size, element_count*element_size, 0, &mapped_memory );
+  context->device_dispatch.mapMemory( vk_memory, index*element_size, element_count*element_size, 0, &mapped_memory );
 
   return mapped_memory;
 }
@@ -192,7 +192,7 @@ void Buffer::unmap()
 {
   if (mapped_memory)
   {
-    context->device_dispatch.unmapMemory( memory );
+    context->device_dispatch.unmapMemory( vk_memory );
     mapped_memory = nullptr;
   }
 }

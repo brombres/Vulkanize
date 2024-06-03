@@ -10,7 +10,7 @@ bool ConfigureFramebuffers::on_activate()
   {
     std::vector<VkImageView> attachments(2);
     attachments[0] = context->swapchain_image_views[i];
-    attachments[1] = context->depth_stencil.view;
+    attachments[1] = context->depth_stencil.vk_view;
 
     VkFramebufferCreateInfo framebuffer_info = {};
     framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;

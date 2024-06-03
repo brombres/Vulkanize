@@ -42,8 +42,8 @@ namespace VKZ
     std::vector<Buffer>          vertex_buffers;
     std::vector<Buffer>          staging_buffers;
     std::vector<VkCommandBuffer> command_buffers;
-    Buffer*                      vertex_buffer = nullptr;
-    Buffer*                      staging_buffer = nullptr;
+    Buffer*                      vertex_buffer;
+    Buffer*                      staging_buffer;
     VkCommandBuffer              cmd;
 
     std::vector<VkSemaphore> image_available_semaphores;

@@ -32,9 +32,14 @@ namespace VKZ
   {
     Context*       context;
     VkFormat       format;
-    VkImage        image;
-    VkDeviceMemory memory;
-    VkImageView    view;
+    VkImageLayout  layout;
+    uint32_t       width;
+    uint32_t       height;
+
+    VkImage        vk_image;
+    VkDeviceMemory vk_memory;
+    VkImageView    vk_view;
+
     bool           image_created = false;
     bool           memory_allocated = false;
     bool           view_created = false;
@@ -46,5 +51,9 @@ namespace VKZ
 
     virtual bool create( Context* context, ImageInfo& info );
     virtual void destroy();
+
+    virtual void copy_from( Buffer& buffer );
+
+    virtual void transition_layout( VkImageLayout new_layout );
   };
 };
