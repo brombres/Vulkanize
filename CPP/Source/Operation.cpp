@@ -60,39 +60,25 @@ bool Operation::handle_event( Event event )
     if (first_child && !first_child->handle_event(event)) return false;
   }
 
-  if ( !configured ) {
-    configured = true;
-    on_configure();
-  }
+  switch (event.type)
+  {
+    case EventType::ACTIVATE:
+      if ( !activate() ) return false;
+      break;
 
-  if (event.type == EventType::DEACTIVATE)
-  {
-    if (active || progress)
-    {
-      on_deactivate();
-      active = false;
-      progress = 0;
-    }
-  }
-  else if (event.type == EventType::ACTIVATE)
-  {
-    if ( !active )
-    {
-      if ( !on_activate() ) return false;
-      active = true;
-    }
-  }
-  else if (event.type == EventType::EXECUTE)
-  {
-    if ( !on_execute() ) return false;
-  }
-  else if (event.type == EventType::SURFACE_LOST)
-  {
-    on_surface_lost();
-  }
-  else
-  {
-    if ( !on_custom_event(event.name) ) return false;
+    case EventType::DEACTIVATE:
+      deactivate();
+      break;
+
+    case EventType::EXECUTE:
+      if ( !execute() ) return false;
+      break;
+
+    case EventType::SURFACE_LOST:
+      on_surface_lost();
+      break;
+
+    default:
   }
 
   if ( !event.reverse_order )

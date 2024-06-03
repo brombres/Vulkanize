@@ -7,6 +7,11 @@ ConfigureDevice::ConfigureDevice( int major_version, int minor_version )
 {
 }
 
+void ConfigureDevice::on_configure()
+{
+  required_features.samplerAnisotropy = VK_TRUE;
+}
+
 bool ConfigureDevice::on_activate()
 {
   //features12.bufferDeviceAddress = true;

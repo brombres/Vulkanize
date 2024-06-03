@@ -114,6 +114,7 @@ namespace VKZ
 #include "Vulkanize/Configure/ConfigureSemaphores.h"
 #include "Vulkanize/Configure/ConfigureFences.h"
 #include "Vulkanize/Configure/ConfigureDescriptors.h"
+#include "Vulkanize/Configure/ConfigureTextureSampler.h"
 #include "Vulkanize/Render/RenderBegin.h"
 #include "Vulkanize/Render/RenderEnd.h"
 
