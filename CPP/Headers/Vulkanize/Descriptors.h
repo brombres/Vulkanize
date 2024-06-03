@@ -12,14 +12,12 @@ namespace VKZ
     Context*               context;
     bool                   activated = false;
     uint32_t               binding;
-    uint32_t               count;
-    size_t                 size;
     VkDescriptorType       type;
+    uint32_t               count = 1;
+    VkSampler*             immutable_samplers = nullptr;
     VkShaderStageFlags     stage;
-    VkSampler*             samplers = nullptr;
-    VkDescriptorBufferInfo buffer_info;
-    VkDescriptorImageInfo  image_info;
 
+    Descriptor( uint32_t binding, VkShaderStageFlags stage, VkDescriptorType type );
     virtual ~Descriptor(){}
 
     virtual bool activate( Context* context );
@@ -39,7 +37,8 @@ namespace VKZ
     std::vector<Buffer> buffers;
 
     // METHODS
-    virtual ~UniformBufferDescriptor(){}
+    UniformBufferDescriptor( uint32_t binding, VkShaderStageFlags stage )
+      : Descriptor( binding, stage, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ) {}
 
     bool on_activate() override
     {
@@ -95,6 +94,20 @@ namespace VKZ
     }
   };
 
+  struct CombinedImageSamplerDescriptor : Descriptor
+  {
+    // PROPERTIES
+    Image*    image;
+    VkSampler vk_sampler;
+    VkDescriptorImageInfo image_info = {};
+
+    // METHODS
+    CombinedImageSamplerDescriptor( uint32_t binding, VkShaderStageFlags stage,
+                                    Image* image, VkSampler vk_sampler );
+
+    bool configure_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) override;
+  };
+
   struct Descriptors
   {
     // PROPERTIES
@@ -113,19 +126,14 @@ namespace VKZ
     virtual bool activate( Context* context );
     virtual void deactivate();
 
-    //virtual Descriptor* add_combined_image_sampler( uint32_t binding, VkShaderStageFlags stage,
-    //                                                VkSampler* samplers, uint32_t count=1 );
-    //virtual Descriptor* add_descriptor( uint32_t binding, VkDescriptorType type, VkShaderStageFlags stage,
-    //                                    VkSampler* samplers=nullptr, uint32_t count=1 );
+    virtual CombinedImageSamplerDescriptor* add_combined_image_sampler(
+        uint32_t binding, VkShaderStageFlags stage, Image* image, VkSampler sampler
+    );
 
     template <typename DataType>
-    UniformBufferDescriptor<DataType>* add_uniform_buffer( uint32_t binding, VkShaderStageFlags stage, uint32_t count=1 )
+    UniformBufferDescriptor<DataType>* add_uniform_buffer( uint32_t binding, VkShaderStageFlags stage )
     {
-      UniformBufferDescriptor<DataType>* descriptor = new UniformBufferDescriptor<DataType>();
-      descriptor->binding  = binding;
-      descriptor->count    = count;
-      descriptor->type     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-      descriptor->stage    = stage;
+      UniformBufferDescriptor<DataType>* descriptor = new UniformBufferDescriptor<DataType>( binding, stage );
       descriptors.push_back( descriptor );
       return descriptor;
     }

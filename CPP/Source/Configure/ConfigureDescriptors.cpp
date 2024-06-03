@@ -17,7 +17,7 @@ bool ConfigureDescriptors::on_activate()
     layout_binding.descriptorType = info->type;
     layout_binding.descriptorCount = info->count;
     layout_binding.stageFlags = info->stage;
-    layout_binding.pImmutableSamplers = info->samplers;
+    layout_binding.pImmutableSamplers = info->immutable_samplers;
     bindings.push_back( layout_binding );
   }
   progress = 2;
