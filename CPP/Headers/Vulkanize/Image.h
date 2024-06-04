@@ -10,14 +10,15 @@ namespace VKZ
   struct ImageInfo
   {
     // PROPERTIES
+    Context*              context;
     VkImageCreateInfo     image_info = {};
     VkMemoryPropertyFlags memory_properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
     VkImageViewCreateInfo view_info = {};
 
     // METHODS
-    ImageInfo();
+    ImageInfo( Context* context );
 
-    ImageInfo( int width, int height, VkFormat format,
+    ImageInfo(  Context* context, int width, int height, VkFormat format,
                VkImageUsageFlags usage, VkImageAspectFlags aspect,
                VkMemoryPropertyFlags memory_properties=VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                VkImageTiling tiling=VK_IMAGE_TILING_OPTIMAL );
@@ -46,10 +47,10 @@ namespace VKZ
     bool           exists = false;
 
     Image();
-    Image( Context* context, ImageInfo& info );
+    Image( ImageInfo& info );
     ~Image();
 
-    virtual bool create( Context* context, ImageInfo& info );
+    virtual bool create( ImageInfo& info );
     virtual void destroy();
 
     virtual void copy_from( Buffer& buffer );

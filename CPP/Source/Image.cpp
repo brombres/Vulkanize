@@ -5,8 +5,9 @@ using namespace VKZ;
 //==============================================================================
 // ImageInfo
 //==============================================================================
-ImageInfo::ImageInfo()
+ImageInfo::ImageInfo( Context* context )
 {
+  this->context = context;
   configure(
     0, 0, VK_FORMAT_R8G8B8A8_SRGB,
     VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -15,10 +16,11 @@ ImageInfo::ImageInfo()
   );
 }
 
-ImageInfo::ImageInfo( int width, int height, VkFormat format,
+ImageInfo::ImageInfo( Context* context, int width, int height, VkFormat format,
                       VkImageUsageFlags usage, VkImageAspectFlags aspect,
                       VkMemoryPropertyFlags memory_properties, VkImageTiling tiling )
 {
+  this->context = context;
   configure( width, height, format, usage, aspect, memory_properties, tiling );
 }
 
@@ -57,9 +59,9 @@ void ImageInfo::configure( int width, int height, VkFormat format,
 //==============================================================================
 Image::Image() {}
 
-Image::Image( Context* context, ImageInfo& info )
+Image::Image( ImageInfo& info )
 {
-  create( context, info );
+  create( info );
 }
 
 Image::~Image()
@@ -67,9 +69,9 @@ Image::~Image()
   destroy();
 }
 
-bool Image::create( Context* context, ImageInfo& info )
+bool Image::create( ImageInfo& info )
 {
-  this->context = context;
+  this->context = info.context;
   this->format  = info.image_info.format;
   this->layout  = info.image_info.initialLayout;
   this->width   = info.image_info.extent.width;

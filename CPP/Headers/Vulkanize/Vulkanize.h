@@ -98,6 +98,7 @@ namespace VKZ
 #include "Vulkanize/ContextOperation.h"
 #include "Vulkanize/Process.h"
 #include "Vulkanize/Context.h"
+#include "Vulkanize/Sampler.h"
 #include "Vulkanize/Descriptors.h"
 #include "Vulkanize/Configure/ConfigureDevice.h"
 #include "Vulkanize/Configure/ConfigureFormats.h"
