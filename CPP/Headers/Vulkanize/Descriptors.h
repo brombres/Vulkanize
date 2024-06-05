@@ -9,21 +9,24 @@ namespace VKZ
 {
   struct Descriptor
   {
-    Context*               context;
-    bool                   activated = false;
-    uint32_t               binding;
-    VkDescriptorType       type;
-    uint32_t               count = 1;
-    VkSampler*             immutable_samplers = nullptr;
-    VkShaderStageFlags     stage;
+    Descriptors*       descriptors = nullptr;
+    Context*           context = nullptr;
+    bool               activated = false;
+    uint32_t           binding;
+    VkDescriptorType   type;
+    uint32_t           count = 1;
+    VkSampler*         immutable_samplers = nullptr;
+    VkShaderStageFlags stage;
+    int                update_frames = 0;
 
-    Descriptor( uint32_t binding, VkShaderStageFlags stage, VkDescriptorType type );
+    Descriptor( Descriptors* descriptors, uint32_t binding, VkShaderStageFlags stage, VkDescriptorType type );
     virtual ~Descriptor(){}
 
     virtual bool activate( Context* context );
     virtual void deactivate();
 
-    virtual bool configure_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) = 0;
+    virtual bool update_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) = 0;
+    virtual void update_descriptor_set_if_modified();
 
     virtual bool on_activate() { return true; }
     virtual void on_deactivate() {}
@@ -37,8 +40,8 @@ namespace VKZ
     std::vector<Buffer> buffers;
 
     // METHODS
-    UniformBufferDescriptor( uint32_t binding, VkShaderStageFlags stage )
-      : Descriptor( binding, stage, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ) {}
+    UniformBufferDescriptor( Descriptors* descriptors, uint32_t binding, VkShaderStageFlags stage )
+      : Descriptor( descriptors, binding, stage, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ) {}
 
     bool on_activate() override
     {
@@ -62,7 +65,7 @@ namespace VKZ
       }
     }
 
-    bool configure_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) override
+    bool update_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) override
     {
       VkDescriptorBufferInfo buffer_info = {};
       buffer_info.buffer = buffers[swap_index].vk_buffer;
@@ -75,7 +78,7 @@ namespace VKZ
       write.dstBinding = binding;
       write.dstArrayElement = 0;
       write.descriptorCount = 1;
-      write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+      write.descriptorType = type;
       write.pBufferInfo = &buffer_info;
 
       context->device_dispatch.updateDescriptorSets( 1, &write, 0, nullptr );
@@ -87,25 +90,43 @@ namespace VKZ
     {
       this->value = value;
 
-      for (auto& buffer : buffers)
+      if (activated)
       {
-        buffer.copy_from( &value, sizeof(DataType) );
+        for (auto& buffer : buffers)
+        {
+          buffer.copy_from( &value, sizeof(DataType) );
+        }
+        update_frames = (1 << context->swapchain_count) - 1;
       }
     }
+  };
+
+  struct SamplerDescriptor : Descriptor
+  {
+    // PROPERTIES
+    VkDescriptorImageInfo image_info = {};
+    Sampler*              sampler;
+
+    // METHODS
+    SamplerDescriptor( Descriptors* descriptors, uint32_t binding, VkShaderStageFlags stage, Sampler* sampler );
+
+    void set( Sampler* new_sampler );
+    bool update_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) override;
   };
 
   struct CombinedImageSamplerDescriptor : Descriptor
   {
     // PROPERTIES
     Image*    image;
-    VkSampler vk_sampler;
+    Sampler*  sampler;
     VkDescriptorImageInfo image_info = {};
 
     // METHODS
-    CombinedImageSamplerDescriptor( uint32_t binding, VkShaderStageFlags stage,
-                                    Image* image, VkSampler vk_sampler );
+    CombinedImageSamplerDescriptor( Descriptors* descriptors, uint32_t binding, VkShaderStageFlags stage,
+                                    Image* image, Sampler* sampler );
 
-    bool configure_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) override;
+    void set( Image* new_image, Sampler* new_sampler );
+    bool update_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) override;
   };
 
   struct Descriptors
@@ -127,18 +148,24 @@ namespace VKZ
     virtual void deactivate();
 
     virtual CombinedImageSamplerDescriptor* add_combined_image_sampler(
-        uint32_t binding, VkShaderStageFlags stage, Image* image, VkSampler sampler
+        uint32_t binding, VkShaderStageFlags stage, Image* image, Sampler* sampler
+    );
+
+    virtual SamplerDescriptor* add_sampler(
+        uint32_t binding, VkShaderStageFlags stage, Sampler* sampler
     );
 
     template <typename DataType>
     UniformBufferDescriptor<DataType>* add_uniform_buffer( uint32_t binding, VkShaderStageFlags stage )
     {
-      UniformBufferDescriptor<DataType>* descriptor = new UniformBufferDescriptor<DataType>( binding, stage );
+      UniformBufferDescriptor<DataType>* descriptor = new UniformBufferDescriptor<DataType>(
+        this, binding, stage );
       descriptors.push_back( descriptor );
       return descriptor;
     }
 
-    virtual bool configure_descriptor_sets( uint32_t swap_index );
+    virtual bool configure_descriptor_sets();
+    virtual void update_modified_descriptor_sets();
 
     virtual Descriptor*& operator[]( size_t index )
     {

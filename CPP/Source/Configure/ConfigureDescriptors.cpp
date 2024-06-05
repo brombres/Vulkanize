@@ -4,10 +4,7 @@ using namespace VKZ;
 
 bool ConfigureDescriptors::on_activate()
 {
-  for (auto descriptor : descriptors->descriptors)
-  {
-    if ( !descriptor->activate(context) ) return false;
-  }
+  if ( !descriptors->activate(context) ) return false;
   progress = 1;
 
   for (Descriptor* info : descriptors->descriptors)
@@ -76,10 +73,7 @@ bool ConfigureDescriptors::on_activate()
     return false;
   );
 
-  for (uint32_t i=0; i<swapchain_count; ++i)
-  {
-    if ( !descriptors->configure_descriptor_sets(i) ) return false;
-  }
+  if ( !descriptors->configure_descriptor_sets() ) return false;
 
   progress = 5;
 
@@ -90,11 +84,7 @@ void ConfigureDescriptors::on_deactivate()
 {
   if (progress >= 3) context->device_dispatch.destroyDescriptorPool( descriptors->pool, nullptr );
   if (progress >= 2) context->device_dispatch.destroyDescriptorSetLayout( descriptors->layout, nullptr );
-
-  if (progress >= 1)
-  {
-    for (auto descriptor : descriptors->descriptors) descriptor->deactivate();
-  }
+  if (progress >= 1) descriptors->deactivate();
 
   pool_sizes.clear();
   bindings.clear();
