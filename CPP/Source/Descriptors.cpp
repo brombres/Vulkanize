@@ -112,6 +112,41 @@ bool CombinedImageSamplerDescriptor::update_descriptor_set( uint32_t swap_index,
 }
 
 //==============================================================================
+// SampledImageDescriptor
+//==============================================================================
+SampledImageDescriptor::SampledImageDescriptor(
+    Descriptors* descriptors, uint32_t binding, VkShaderStageFlags stage, Image* image )
+  : Descriptor(descriptors, binding, stage, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE), image(image)
+{
+  image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  image_info.imageView   = image->vk_view;
+}
+
+void SampledImageDescriptor::set( Image* new_image )
+{
+  image = new_image;
+  image_info.imageView = new_image->vk_view;
+  if (activated) update_frames = (1 << context->swapchain_count) - 1;
+}
+
+bool SampledImageDescriptor::update_descriptor_set( uint32_t swap_index,
+    VkDescriptorSet& set )
+{
+  VkWriteDescriptorSet write;
+  write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  write.dstSet = set;
+  write.dstBinding = binding;
+  write.dstArrayElement = 0;
+  write.descriptorCount = 1;
+  write.descriptorType = type;
+  write.pImageInfo = &image_info;
+
+  context->device_dispatch.updateDescriptorSets( 1, &write, 0, nullptr );
+
+  return true;
+}
+
+//==============================================================================
 // Descriptors
 //==============================================================================
 Descriptors::~Descriptors()
@@ -149,6 +184,16 @@ CombinedImageSamplerDescriptor* Descriptors::add_combined_image_sampler(
 {
   CombinedImageSamplerDescriptor* descriptor = new CombinedImageSamplerDescriptor(
     this, binding, stage, image, sampler
+  );
+  descriptors.push_back( descriptor );
+  return descriptor;
+}
+
+SampledImageDescriptor* Descriptors::add_sampled_image(
+    uint32_t binding, VkShaderStageFlags stage, Image* image )
+{
+  SampledImageDescriptor* descriptor = new SampledImageDescriptor(
+    this, binding, stage, image
   );
   descriptors.push_back( descriptor );
   return descriptor;

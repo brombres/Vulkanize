@@ -129,6 +129,20 @@ namespace VKZ
     bool update_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) override;
   };
 
+  struct SampledImageDescriptor : Descriptor
+  {
+    // PROPERTIES
+    Image*    image;
+    VkDescriptorImageInfo image_info = {};
+
+    // METHODS
+    SampledImageDescriptor( Descriptors* descriptors, uint32_t binding, VkShaderStageFlags stage,
+                            Image* image );
+
+    void set( Image* new_image );
+    bool update_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) override;
+  };
+
   struct Descriptors
   {
     // PROPERTIES
@@ -149,6 +163,10 @@ namespace VKZ
 
     virtual CombinedImageSamplerDescriptor* add_combined_image_sampler(
         uint32_t binding, VkShaderStageFlags stage, Image* image, Sampler* sampler
+    );
+
+    virtual SampledImageDescriptor* add_sampled_image(
+        uint32_t binding, VkShaderStageFlags stage, Image* image
     );
 
     virtual SamplerDescriptor* add_sampler(
