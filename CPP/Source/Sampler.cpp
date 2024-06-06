@@ -33,19 +33,31 @@ SamplerInfo::SamplerInfo( Context* context ) : context(context)
 //==============================================================================
 // Sampler
 //==============================================================================
-Sampler::Sampler( SamplerInfo& info ) : context(context)
+Sampler::Sampler( SamplerInfo& info )
 {
-  this->context = info.context;
-
-  exists = true;
-  VKZ_ATTEMPT(
-    "creating sampler",
-    context->device_dispatch.createSampler( &info.sampler_info, nullptr, &vk_sampler ),
-    exists = false;
-  );
+  create( info );
 }
 
 Sampler::~Sampler()
+{
+  destroy();
+}
+
+bool Sampler::create( SamplerInfo& info )
+{
+  this->context = info.context;
+
+  VKZ_ATTEMPT(
+    "creating sampler",
+    context->device_dispatch.createSampler( &info.sampler_info, nullptr, &vk_sampler ),
+    return false
+  );
+
+  exists = true;
+  return true;
+}
+
+void Sampler::destroy()
 {
   if (exists)
   {
@@ -53,3 +65,4 @@ Sampler::~Sampler()
     context->device_dispatch.destroySampler( vk_sampler, nullptr );
   }
 }
+

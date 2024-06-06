@@ -19,7 +19,12 @@ namespace VKZ
     VkSampler  vk_sampler;
     bool       exists = false;
 
+    Sampler() {}
     Sampler( SamplerInfo& info );
+
+    bool create( SamplerInfo& info );
+    void destroy();
+
     virtual ~Sampler();
   };
 };
