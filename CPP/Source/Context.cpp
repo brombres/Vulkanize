@@ -55,6 +55,7 @@ void Context::configure_operations()
   set_operation( "configure.semaphores",                new ConfigureSemaphores() );
   set_operation( "configure.fences",                    new ConfigureFences() );
   set_operation( "configure.buffers",                   nullptr );
+  set_operation( "configure.images",                    nullptr );
   set_operation( "configure.samplers",                  nullptr );
   set_operation( "configure.descriptors",               nullptr );
   set_operation( "configure.graphics_pipelines",        nullptr );
