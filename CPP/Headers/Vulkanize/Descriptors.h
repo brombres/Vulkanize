@@ -26,7 +26,7 @@ namespace VKZ
     virtual void deactivate();
 
     virtual bool update_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) = 0;
-    virtual void update_descriptor_set_if_modified();
+    virtual bool update_descriptor_set_if_modified();
 
     virtual bool on_activate() { return true; }
     virtual void on_deactivate() {}
@@ -183,7 +183,7 @@ namespace VKZ
     }
 
     virtual bool configure_descriptor_sets();
-    virtual void update_modified_descriptor_sets();
+    virtual bool update_modified_descriptor_sets();
 
     virtual Descriptor*& operator[]( size_t index )
     {

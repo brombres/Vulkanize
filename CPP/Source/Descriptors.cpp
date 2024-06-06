@@ -15,6 +15,7 @@ bool Descriptor::activate( Context* context )
   if (activated) return true;
   this->context = context;
   if ( !on_activate() ) return false;
+
   activated = true;
   return true;
 }
@@ -26,15 +27,16 @@ void Descriptor::deactivate()
   activated = false;
 }
 
-void Descriptor::update_descriptor_set_if_modified()
+bool Descriptor::update_descriptor_set_if_modified()
 {
   uint32_t swap_index = context->swap_index;
   int flag = (1 << swap_index);
-  if ( !(update_frames & flag) ) return;
+  if ( !(update_frames & flag) ) return false;
 
   update_descriptor_set( swap_index, descriptors->sets[swap_index] );
 
   update_frames &= ~flag;
+  return true;
 }
 
 //==============================================================================
@@ -220,11 +222,13 @@ bool Descriptors::configure_descriptor_sets()
   return true;
 }
 
-void Descriptors::update_modified_descriptor_sets()
+bool Descriptors::update_modified_descriptor_sets()
 {
+  bool any_updated = false;
   for (Descriptor* descriptor : descriptors)
   {
-    descriptor->update_descriptor_set_if_modified();
+    if (descriptor->update_descriptor_set_if_modified()) any_updated = true;
   }
+  return any_updated;
 }
 

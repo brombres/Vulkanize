@@ -5,13 +5,7 @@ using namespace VKZ;
 void GraphicsPipeline::cmd_bind( VkCommandBuffer cmd )
 {
   context->device_dispatch.cmdBindPipeline( cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_pipeline );
-
-  if (descriptors)
-  {
-    descriptors->update_modified_descriptor_sets();
-    context->device_dispatch.cmdBindDescriptorSets( cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        layout, 0, 1, &descriptors->sets[context->swap_index], 0, nullptr );
-  }
+  cmd_bind_updated_descriptor_sets( cmd, true );
 }
 
 void GraphicsPipeline::cmd_set_default_viewports_and_scissor_rects( VkCommandBuffer cmd )
@@ -27,6 +21,18 @@ void GraphicsPipeline::cmd_set_viewports_and_scissor_rects( VkCommandBuffer cmd 
 {
   context->device_dispatch.cmdSetViewport( cmd, 0, (uint32_t)viewports.size(), viewports.data() );
   context->device_dispatch.cmdSetScissor(  cmd, 0, (uint32_t)scissor_rects.size(), scissor_rects.data() );
+}
+
+void GraphicsPipeline::cmd_bind_updated_descriptor_sets( VkCommandBuffer cmd, bool force_update )
+{
+  if (descriptors)
+  {
+    if (descriptors->update_modified_descriptor_sets() || force_update)
+    {
+      context->device_dispatch.cmdBindDescriptorSets( cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+          layout, 0, 1, &descriptors->sets[context->swap_index], 0, nullptr );
+    }
+  }
 }
 
 void GraphicsPipeline::set_default_scissor_rect( int index )
