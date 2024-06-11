@@ -64,6 +64,11 @@ Image::Image( ImageInfo& info )
   create( info );
 }
 
+Image::Image( Context* context, void* pixel_data, int width, int height )
+{
+  create( context, pixel_data, width, height );
+}
+
 Image::~Image()
 {
   destroy();
@@ -119,6 +124,15 @@ bool Image::create( ImageInfo& info )
   return true;
 }
 
+bool Image::create( Context* context, void* pixel_data, int width, int height )
+{
+  ImageInfo info( context, width, height );
+  if ( !create(info) ) return false;
+
+  copy_from( pixel_data );
+  return true;
+}
+
 void Image::destroy()
 {
   if (view_created)
@@ -169,6 +183,19 @@ void Image::copy_from( Buffer& buffer )
   );
 
   context->end_cmd( cmd );
+}
+
+void Image::copy_from( void* pixel_data )
+{
+  Buffer staging_buffer;
+  staging_buffer.create_staging_buffer( context, 4, width*height );
+  staging_buffer.copy_from( pixel_data, width*height );
+
+  transition_layout( VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
+  copy_from( staging_buffer );
+  transition_layout( VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
+
+  staging_buffer.destroy();
 }
 
 void Image::transition_layout( VkImageLayout new_layout )
