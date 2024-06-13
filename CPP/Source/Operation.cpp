@@ -77,8 +77,8 @@ bool Operation::handle_event( Event event )
     case EventType::SURFACE_LOST:
       on_surface_lost();
       break;
-
-    default:
+      
+    default:;
   }
 
   if ( !event.reverse_order )
