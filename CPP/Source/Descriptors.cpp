@@ -27,15 +27,20 @@ void Descriptor::deactivate()
   activated = false;
 }
 
+VkDescriptorSet Descriptor::get_descriptor_set( int swap_index )
+{
+  return descriptors->sets[swap_index];
+}
+
 bool Descriptor::update_descriptor_set_if_modified()
 {
   uint32_t swap_index = context->swap_index;
-  int flag = (1 << swap_index);
-  if ( !(update_frames & flag) ) return false;
+  int frame_bit = (1 << swap_index);
+  if ( !(update_frames & frame_bit) ) return false;
 
   update_descriptor_set( swap_index, descriptors->sets[swap_index] );
 
-  update_frames &= ~flag;
+  update_frames &= ~frame_bit;
   return true;
 }
 
@@ -53,7 +58,13 @@ void SamplerDescriptor::set( Sampler* new_sampler )
 {
   sampler = new_sampler;
   image_info.sampler = new_sampler->vk_sampler;
-  if (activated) update_frames = (1 << context->swapchain_count) - 1;
+  if (activated)
+  {
+    uint32_t swap_index = context->swap_index;
+    int frame_bit = (1 << swap_index);
+    update_frames = ((1 << context->swapchain_count) - 1) & ~frame_bit;
+    update_descriptor_set( swap_index, descriptors->sets[swap_index] );
+  }
 }
 
 bool SamplerDescriptor::update_descriptor_set( uint32_t swap_index,
@@ -83,32 +94,67 @@ CombinedImageSamplerDescriptor::CombinedImageSamplerDescriptor(
     image(image), sampler(sampler)
 {
   image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-  image_info.imageView   = image->vk_view;
-  image_info.sampler     = sampler->vk_sampler;
+  if (image)   image_info.imageView = image->vk_view;
+  if (sampler) image_info.sampler   = sampler->vk_sampler;
+}
+
+void CombinedImageSamplerDescriptor::set( Image* new_image )
+{
+  image = new_image;
+  if (new_image) image_info.imageView = new_image->vk_view;
+  if (activated)
+  {
+    uint32_t swap_index = context->swap_index;
+    int frame_bit = (1 << swap_index);
+    update_frames = ((1 << context->swapchain_count) - 1) & ~frame_bit;
+    update_descriptor_set( swap_index, descriptors->sets[swap_index] );
+  }
 }
 
 void CombinedImageSamplerDescriptor::set( Image* new_image, Sampler* new_sampler )
 {
   image = new_image;
   sampler = new_sampler;
-  image_info.imageView = new_image->vk_view;
-  image_info.sampler   = new_sampler->vk_sampler;
-  if (activated) update_frames = (1 << context->swapchain_count) - 1;
+  if (new_image)   image_info.imageView = new_image->vk_view;
+  if (new_sampler) image_info.sampler   = new_sampler->vk_sampler;
+  if (activated)
+  {
+    uint32_t swap_index = context->swap_index;
+    int frame_bit = (1 << swap_index);
+    update_frames = ((1 << context->swapchain_count) - 1) & ~frame_bit;
+    update_descriptor_set( swap_index, descriptors->sets[swap_index] );
+  }
+}
+
+void CombinedImageSamplerDescriptor::set( Sampler* new_sampler )
+{
+  sampler = new_sampler;
+  if (new_sampler) image_info.sampler = new_sampler->vk_sampler;
+  if (activated)
+  {
+    uint32_t swap_index = context->swap_index;
+    int frame_bit = (1 << swap_index);
+    update_frames = ((1 << context->swapchain_count) - 1) & ~frame_bit;
+    update_descriptor_set( swap_index, descriptors->sets[swap_index] );
+  }
 }
 
 bool CombinedImageSamplerDescriptor::update_descriptor_set( uint32_t swap_index,
     VkDescriptorSet& set )
 {
-  VkWriteDescriptorSet write;
-  write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-  write.dstSet = set;
-  write.dstBinding = binding;
-  write.dstArrayElement = 0;
-  write.descriptorCount = 1;
-  write.descriptorType = type;
-  write.pImageInfo = &image_info;
+  if (image && sampler)
+  {
+    VkWriteDescriptorSet write;
+    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    write.dstSet = set;
+    write.dstBinding = binding;
+    write.dstArrayElement = 0;
+    write.descriptorCount = 1;
+    write.descriptorType = type;
+    write.pImageInfo = &image_info;
 
-  context->device_dispatch.updateDescriptorSets( 1, &write, 0, nullptr );
+    context->device_dispatch.updateDescriptorSets( 1, &write, 0, nullptr );
+  }
 
   return true;
 }
@@ -128,7 +174,13 @@ void SampledImageDescriptor::set( Image* new_image )
 {
   image = new_image;
   image_info.imageView = new_image->vk_view;
-  if (activated) update_frames = (1 << context->swapchain_count) - 1;
+  if (activated)
+  {
+    uint32_t swap_index = context->swap_index;
+    int frame_bit = (1 << swap_index);
+    update_frames = ((1 << context->swapchain_count) - 1) & ~frame_bit;
+    update_descriptor_set( swap_index, descriptors->sets[swap_index] );
+  }
 }
 
 bool SampledImageDescriptor::update_descriptor_set( uint32_t swap_index,

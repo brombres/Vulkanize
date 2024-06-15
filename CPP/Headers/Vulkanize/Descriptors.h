@@ -25,6 +25,8 @@ namespace VKZ
     virtual bool activate( Context* context );
     virtual void deactivate();
 
+    virtual VkDescriptorSet get_descriptor_set( int swap_index );
+
     virtual bool update_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) = 0;
     virtual bool update_descriptor_set_if_modified();
 
@@ -96,7 +98,11 @@ namespace VKZ
         {
           buffer.copy_from( &value, sizeof(DataType) );
         }
-        update_frames = (1 << context->swapchain_count) - 1;
+
+        uint32_t swap_index = context->swap_index;
+        int frame_bit = (1 << swap_index);
+        update_frames = ((1 << context->swapchain_count) - 1) & ~frame_bit;
+        update_descriptor_set( swap_index, get_descriptor_set(swap_index) );
       }
     }
   };
@@ -125,7 +131,9 @@ namespace VKZ
     CombinedImageSamplerDescriptor( Descriptors* descriptors, uint32_t binding, VkShaderStageFlags stage,
                                     Image* image, Sampler* sampler );
 
+    void set( Image* new_image );
     void set( Image* new_image, Sampler* new_sampler );
+    void set( Sampler* new_sampler );
     bool update_descriptor_set( uint32_t swap_index, VkDescriptorSet& set ) override;
   };
 
