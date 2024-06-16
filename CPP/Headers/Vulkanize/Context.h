@@ -65,6 +65,7 @@ namespace VKZ
     virtual void add_operation( std::string phase, Operation* operation );
     virtual void destroy();
     virtual int  find_memory_type( uint32_t typeFilter, VkMemoryPropertyFlags properties );
+    virtual void on_surface_size_change( int width, int height );
     virtual void reset_cmd( VkCommandBuffer cmd );
     virtual void recreate_swapchain();
     virtual void set_operation( std::string phase, Operation* operation );

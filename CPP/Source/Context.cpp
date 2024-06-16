@@ -92,6 +92,11 @@ int Context::find_memory_type( uint32_t typeFilter, VkMemoryPropertyFlags proper
   return -1;
 }
 
+void Context::on_surface_size_change( int width, int height )
+{
+  // Override
+}
+
 void Context::reset_cmd( VkCommandBuffer cmd )
 {
   device_dispatch.resetCommandBuffer( cmd, (VkCommandBufferResetFlagBits)0 );
@@ -108,6 +113,7 @@ void Context::recreate_swapchain()
   dispatch_event( "configure.swapchain", Event(EventType::SURFACE_LOST,true) );
   deactivate( "configure.swapchain" );
   activate( "configure.swapchain" );
+  on_surface_size_change( (int)surface_size.width, (int)surface_size.height );
 }
 
 void Context::set_operation( std::string phase, Operation* operation )
