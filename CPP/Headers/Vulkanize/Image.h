@@ -64,6 +64,7 @@ namespace VKZ
     virtual bool create( Context* context, void* pixel_data, int width, int height );
     virtual void destroy();
 
+    virtual void cmd_wait_until_drawing_complete( VkCommandBuffer cmd );
     virtual void copy_from( Buffer& buffer );
     virtual void copy_from( void* pixel_data );
 
