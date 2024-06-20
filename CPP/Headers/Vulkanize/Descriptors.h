@@ -190,6 +190,7 @@ namespace VKZ
       return descriptor;
     }
 
+    virtual void cmd_bind( VkCommandBuffer cmd, GraphicsPipeline* pipeline );
     virtual bool configure_descriptor_sets();
     virtual bool update_modified_descriptor_sets();
 

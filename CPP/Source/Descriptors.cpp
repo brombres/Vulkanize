@@ -261,6 +261,13 @@ SamplerDescriptor* Descriptors::add_sampler(
   return descriptor;
 }
 
+void Descriptors::cmd_bind( VkCommandBuffer cmd, GraphicsPipeline* pipeline )
+{
+  update_modified_descriptor_sets();
+  context->device_dispatch.cmdBindDescriptorSets( cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+      pipeline->layout, 0, 1, &sets[context->swap_index], 0, nullptr );
+}
+
 bool Descriptors::configure_descriptor_sets()
 {
   uint32_t swapchain_count = context->swapchain_count;
