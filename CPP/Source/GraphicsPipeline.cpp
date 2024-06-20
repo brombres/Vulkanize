@@ -5,7 +5,7 @@ using namespace VKZ;
 void GraphicsPipeline::cmd_bind( VkCommandBuffer cmd )
 {
   context->device_dispatch.cmdBindPipeline( cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_pipeline );
-  cmb_bind_descriptor_set( cmd );
+  cmd_bind_descriptor_set( cmd );
 }
 
 void GraphicsPipeline::cmd_set_default_viewports_and_scissor_rects( VkCommandBuffer cmd )
@@ -23,7 +23,7 @@ void GraphicsPipeline::cmd_set_viewports_and_scissor_rects( VkCommandBuffer cmd 
   context->device_dispatch.cmdSetScissor(  cmd, 0, (uint32_t)scissor_rects.size(), scissor_rects.data() );
 }
 
-void GraphicsPipeline::cmb_bind_descriptor_set( VkCommandBuffer cmd )
+void GraphicsPipeline::cmd_bind_descriptor_set( VkCommandBuffer cmd )
 {
   if (descriptors)
   {
