@@ -156,36 +156,6 @@ void Image::destroy()
   exists = false;
 }
 
-void Image::cmd_wait_until_drawing_complete( VkCommandBuffer cmd )
-{
-  VkImageMemoryBarrier barrier = {};
-  barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-  barrier.pNext = nullptr;
-  barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-  barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-  barrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-  barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-  barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-  barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-  barrier.image = vk_image;
-  barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-  barrier.subresourceRange.baseMipLevel = 0;
-  barrier.subresourceRange.levelCount = 1;
-  barrier.subresourceRange.baseArrayLayer = 0;
-  barrier.subresourceRange.layerCount = 1;
-
-  vkCmdPipelineBarrier(
-    cmd,
-    VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, // SrcStageMask
-    VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, // DstStageMask
-    0,                                     // DependencyFlags
-    0, nullptr,                            // Memory barriers
-    0, nullptr,                            // Buffer memory barriers
-    1,                                     // Image memory barrier count
-    &barrier                               // Pointer to image memory barrier
-  );
-}
-
 void Image::copy_from( Buffer& buffer )
 {
   VkCommandBuffer cmd = context->begin_cmd();

@@ -5,7 +5,7 @@
 
 namespace VKZ
 {
-  struct ShaderStageInfo
+  struct Shader
   {
     const int SOURCE = 1;
     const int SPIRV  = 2;
@@ -19,7 +19,7 @@ namespace VKZ
     std::string           spirv_bytecode;
     int                   type;
 
-    ShaderStageInfo( Context* context, VkShaderStageFlagBits stage, std::string shader_filename,
+    Shader( Context* context, VkShaderStageFlagBits stage, std::string shader_filename,
         std::string shader_source, std::string main_function_name="main" )
       : context(context), stage(stage), shader_filename(shader_filename), shader_source(shader_source),
         main_function_name(main_function_name)
@@ -27,7 +27,7 @@ namespace VKZ
       type = SOURCE;
     }
 
-    ShaderStageInfo( Context* context, VkShaderStageFlagBits stage, std::string shader_filename,
+    Shader( Context* context, VkShaderStageFlagBits stage, std::string shader_filename,
         const char* spirv_bytecode, size_t byte_count,
         std::string main_function_name="main" )
       : context(context), stage(stage), shader_filename(shader_filename), main_function_name(main_function_name)
@@ -36,7 +36,7 @@ namespace VKZ
       this->spirv_bytecode.assign( spirv_bytecode, byte_count );
     }
 
-    ~ShaderStageInfo();
+    ~Shader();
 
     void           destroy_module();
     bool           get_create_info( VkPipelineShaderStageCreateInfo& info );

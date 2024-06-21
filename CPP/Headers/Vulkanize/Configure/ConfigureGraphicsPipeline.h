@@ -10,7 +10,7 @@ namespace VKZ
     // PROPERTIES
     GraphicsPipeline* graphics_pipeline;
 
-    std::vector<ShaderStageInfo*>   shader_stages;
+    std::vector<Shader*>   shader_stages;
     std::vector<VertexDescription*> vertex_descriptions;
 
     std::vector<VkDynamicState>     dynamic_states;

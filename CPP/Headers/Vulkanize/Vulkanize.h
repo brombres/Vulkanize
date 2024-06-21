@@ -88,7 +88,7 @@ namespace VKZ
 	}
 
 #include "Vulkanize/Buffer.h"
-#include "Vulkanize/ShaderStageInfo.h"
+#include "Vulkanize/Shader.h"
 #include "Vulkanize/Image.h"
 #include "Vulkanize/VertexDescription.h"
 #include "Vulkanize/CustomVertexDescription.h"
@@ -118,6 +118,7 @@ namespace VKZ
 #include "Vulkanize/Configure/ConfigureTextureSampler.h"
 #include "Vulkanize/Render/RenderBegin.h"
 #include "Vulkanize/Render/RenderEnd.h"
+#include "Vulkanize/Material.h"
 
 #if (VKZ_USE_GLSLANG)
   #include "Vulkanize/Configure/ConfigureGLSLang.h"
