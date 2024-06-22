@@ -32,11 +32,11 @@ ConfigureGraphicsPipeline::~ConfigureGraphicsPipeline()
     shader_stages.pop_back();
   }
 
-  while (vertex_descriptions.size())
+  for (VertexDescription* description : vertex_descriptions)
   {
-    delete vertex_descriptions.back();
-    vertex_descriptions.pop_back();
+    delete description;
   }
+  vertex_descriptions.clear();
 }
 
 bool ConfigureGraphicsPipeline::on_activate()
@@ -144,7 +144,7 @@ bool ConfigureGraphicsPipeline::on_activate()
   );
   progress = 2;
 
-  for (auto shader_stage : shader_stages) shader_stage->destroy_module();
+  for (auto shader_stage : shader_stages) shader_stage->destroy();
 
   return true;
 }
@@ -176,7 +176,7 @@ void ConfigureGraphicsPipeline::on_deactivate()
 
   for (auto shader_stage : shader_stages)
   {
-    shader_stage->destroy_module();
+    shader_stage->destroy();
   }
 }
 

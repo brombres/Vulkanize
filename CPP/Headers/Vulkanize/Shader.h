@@ -18,6 +18,7 @@ namespace VKZ
     std::string           shader_source;
     std::string           spirv_bytecode;
     int                   type;
+    int                   refcount = 0;
 
     Shader( Context* context, VkShaderStageFlagBits stage, std::string shader_filename,
         std::string shader_source, std::string main_function_name="main" )
@@ -36,10 +37,12 @@ namespace VKZ
       this->spirv_bytecode.assign( spirv_bytecode, byte_count );
     }
 
-    ~Shader();
+    virtual ~Shader();
 
-    void           destroy_module();
-    bool           get_create_info( VkPipelineShaderStageCreateInfo& info );
-    VkShaderModule get_module();
+    virtual void           destroy();
+    virtual bool           get_create_info( VkPipelineShaderStageCreateInfo& info );
+    virtual VkShaderModule get_module();
+    virtual void           release() { if ( !--refcount ) delete this; }
+    virtual Shader*        retain() { ++refcount; return this; }
   };
 };

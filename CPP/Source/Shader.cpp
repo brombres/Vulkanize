@@ -4,10 +4,10 @@ using namespace VKZ;
 
 Shader::~Shader()
 {
-  destroy_module();
+  destroy();
 }
 
-void Shader::destroy_module()
+void Shader::destroy()
 {
   if (module != VK_NULL_HANDLE)
   {
