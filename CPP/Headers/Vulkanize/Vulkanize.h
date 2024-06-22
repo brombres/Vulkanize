@@ -87,6 +87,7 @@ namespace VKZ
 		}                                                    \
 	}
 
+#include "Vulkanize/RefCounted.h"
 #include "Vulkanize/Buffer.h"
 #include "Vulkanize/Shader.h"
 #include "Vulkanize/Image.h"
@@ -99,7 +100,7 @@ namespace VKZ
 #include "Vulkanize/Process.h"
 #include "Vulkanize/Context.h"
 #include "Vulkanize/Sampler.h"
-#include "Vulkanize/Descriptors.h"
+#include "Vulkanize/OldDescriptors.h"
 #include "Vulkanize/Configure/ConfigureDevice.h"
 #include "Vulkanize/Configure/ConfigureFormats.h"
 #include "Vulkanize/Configure/ConfigureSurfaceSize.h"
@@ -118,6 +119,8 @@ namespace VKZ
 #include "Vulkanize/Configure/ConfigureTextureSampler.h"
 #include "Vulkanize/Render/RenderBegin.h"
 #include "Vulkanize/Render/RenderEnd.h"
+#include "Vulkanize/Descriptor.h"
+#include "Vulkanize/DescriptorSet.h"
 #include "Vulkanize/Material.h"
 
 #if (VKZ_USE_GLSLANG)

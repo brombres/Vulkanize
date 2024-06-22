@@ -4,7 +4,7 @@
 
 namespace VKZ
 {
-  struct Descriptors;
+  struct OldDescriptors;
 
   struct GraphicsPipeline
   {
@@ -13,7 +13,7 @@ namespace VKZ
     VkPipelineLayout layout;
     VkPipeline       vk_pipeline;
 
-    Descriptors*     descriptors = nullptr;
+    OldDescriptors*     descriptors = nullptr;
 
     std::vector<VkViewport> viewports;
     std::vector<VkRect2D>   scissor_rects;

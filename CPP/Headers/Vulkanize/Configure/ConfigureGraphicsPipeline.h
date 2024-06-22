@@ -42,6 +42,6 @@ namespace VKZ
     virtual void configure_rasterizer_info( VkPipelineRasterizationStateCreateInfo& rasterizer_info );
     virtual void configure_viewports_and_scissor_rects();
 
-    virtual void set_descriptors( Descriptors* descriptors ) { graphics_pipeline->descriptors = descriptors; }
+    virtual void set_descriptors( OldDescriptors* descriptors ) { graphics_pipeline->descriptors = descriptors; }
   };
 };

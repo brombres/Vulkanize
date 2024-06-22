@@ -3,14 +3,14 @@ using namespace std;
 using namespace VKZ;
 
 //==============================================================================
-// Descriptor
+// OldDescriptor
 //==============================================================================
-Descriptor::Descriptor( Descriptors* descriptors, uint32_t binding, VkShaderStageFlags stage, VkDescriptorType type )
+OldDescriptor::OldDescriptor( OldDescriptors* descriptors, uint32_t binding, VkShaderStageFlags stage, VkDescriptorType type )
   : descriptors(descriptors), binding(binding), stage(stage), type(type)
 {
 }
 
-bool Descriptor::activate( Context* context )
+bool OldDescriptor::activate( Context* context )
 {
   if (activated) return true;
   this->context = context;
@@ -20,19 +20,19 @@ bool Descriptor::activate( Context* context )
   return true;
 }
 
-void Descriptor::deactivate()
+void OldDescriptor::deactivate()
 {
   if ( !activated ) return;
   on_deactivate();
   activated = false;
 }
 
-VkDescriptorSet Descriptor::get_descriptor_set( int swap_index )
+VkDescriptorSet OldDescriptor::get_descriptor_set( int swap_index )
 {
   return descriptors->sets[swap_index];
 }
 
-bool Descriptor::update_descriptor_set_if_modified()
+bool OldDescriptor::update_descriptor_set_if_modified()
 {
   uint32_t swap_index = context->swap_index;
   int frame_bit = (1 << swap_index);
@@ -45,16 +45,16 @@ bool Descriptor::update_descriptor_set_if_modified()
 }
 
 //==============================================================================
-// SamplerDescriptor
+// OldSamplerDescriptor
 //==============================================================================
-SamplerDescriptor::SamplerDescriptor(
-    Descriptors* descriptors, uint32_t binding, VkShaderStageFlags stage, Sampler* sampler )
-  : Descriptor(descriptors, binding, stage, VK_DESCRIPTOR_TYPE_SAMPLER), sampler(sampler)
+OldSamplerDescriptor::OldSamplerDescriptor(
+    OldDescriptors* descriptors, uint32_t binding, VkShaderStageFlags stage, Sampler* sampler )
+  : OldDescriptor(descriptors, binding, stage, VK_DESCRIPTOR_TYPE_SAMPLER), sampler(sampler)
 {
   image_info.sampler = sampler->vk_sampler;
 }
 
-void SamplerDescriptor::set( Sampler* new_sampler )
+void OldSamplerDescriptor::set( Sampler* new_sampler )
 {
   sampler = new_sampler;
   image_info.sampler = new_sampler->vk_sampler;
@@ -67,7 +67,7 @@ void SamplerDescriptor::set( Sampler* new_sampler )
   }
 }
 
-bool SamplerDescriptor::update_descriptor_set( uint32_t swap_index,
+bool OldSamplerDescriptor::update_descriptor_set( uint32_t swap_index,
     VkDescriptorSet& set )
 {
   VkWriteDescriptorSet write;
@@ -85,12 +85,12 @@ bool SamplerDescriptor::update_descriptor_set( uint32_t swap_index,
 }
 
 //==============================================================================
-// CombinedImageSamplerDescriptor
+// OldCombinedImageSamplerDescriptor
 //==============================================================================
-CombinedImageSamplerDescriptor::CombinedImageSamplerDescriptor(
-    Descriptors* descriptors, uint32_t binding, VkShaderStageFlags stage, Image* image,
+OldCombinedImageSamplerDescriptor::OldCombinedImageSamplerDescriptor(
+    OldDescriptors* descriptors, uint32_t binding, VkShaderStageFlags stage, Image* image,
     Sampler* sampler )
-  : Descriptor(descriptors, binding, stage, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER),
+  : OldDescriptor(descriptors, binding, stage, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER),
     image(image), sampler(sampler)
 {
   image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -98,7 +98,7 @@ CombinedImageSamplerDescriptor::CombinedImageSamplerDescriptor(
   if (sampler) image_info.sampler   = sampler->vk_sampler;
 }
 
-void CombinedImageSamplerDescriptor::set( Image* new_image )
+void OldCombinedImageSamplerDescriptor::set( Image* new_image )
 {
   image = new_image;
   if (new_image) image_info.imageView = new_image->vk_view;
@@ -111,7 +111,7 @@ void CombinedImageSamplerDescriptor::set( Image* new_image )
   }
 }
 
-void CombinedImageSamplerDescriptor::set( Image* new_image, Sampler* new_sampler )
+void OldCombinedImageSamplerDescriptor::set( Image* new_image, Sampler* new_sampler )
 {
   image = new_image;
   sampler = new_sampler;
@@ -126,7 +126,7 @@ void CombinedImageSamplerDescriptor::set( Image* new_image, Sampler* new_sampler
   }
 }
 
-void CombinedImageSamplerDescriptor::set( Sampler* new_sampler )
+void OldCombinedImageSamplerDescriptor::set( Sampler* new_sampler )
 {
   sampler = new_sampler;
   if (new_sampler) image_info.sampler = new_sampler->vk_sampler;
@@ -139,7 +139,7 @@ void CombinedImageSamplerDescriptor::set( Sampler* new_sampler )
   }
 }
 
-bool CombinedImageSamplerDescriptor::update_descriptor_set( uint32_t swap_index,
+bool OldCombinedImageSamplerDescriptor::update_descriptor_set( uint32_t swap_index,
     VkDescriptorSet& set )
 {
   if (image && sampler)
@@ -160,17 +160,17 @@ bool CombinedImageSamplerDescriptor::update_descriptor_set( uint32_t swap_index,
 }
 
 //==============================================================================
-// SampledImageDescriptor
+// OldSampledImageDescriptor
 //==============================================================================
-SampledImageDescriptor::SampledImageDescriptor(
-    Descriptors* descriptors, uint32_t binding, VkShaderStageFlags stage, Image* image )
-  : Descriptor(descriptors, binding, stage, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE), image(image)
+OldSampledImageDescriptor::OldSampledImageDescriptor(
+    OldDescriptors* descriptors, uint32_t binding, VkShaderStageFlags stage, Image* image )
+  : OldDescriptor(descriptors, binding, stage, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE), image(image)
 {
   image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
   image_info.imageView   = image->vk_view;
 }
 
-void SampledImageDescriptor::set( Image* new_image )
+void OldSampledImageDescriptor::set( Image* new_image )
 {
   image = new_image;
   image_info.imageView = new_image->vk_view;
@@ -183,7 +183,7 @@ void SampledImageDescriptor::set( Image* new_image )
   }
 }
 
-bool SampledImageDescriptor::update_descriptor_set( uint32_t swap_index,
+bool OldSampledImageDescriptor::update_descriptor_set( uint32_t swap_index,
     VkDescriptorSet& set )
 {
   VkWriteDescriptorSet write;
@@ -201,18 +201,18 @@ bool SampledImageDescriptor::update_descriptor_set( uint32_t swap_index,
 }
 
 //==============================================================================
-// Descriptors
+// OldDescriptors
 //==============================================================================
-Descriptors::~Descriptors()
+OldDescriptors::~OldDescriptors()
 {
-  for (Descriptor* descriptor : descriptors)
+  for (OldDescriptor* descriptor : descriptors)
   {
     delete descriptor;
   }
   descriptors.clear();
 }
 
-bool Descriptors::activate( Context* context )
+bool OldDescriptors::activate( Context* context )
 {
   if (activated) return true;
   this->context = context;
@@ -227,53 +227,53 @@ bool Descriptors::activate( Context* context )
   return true;
 }
 
-void Descriptors::deactivate()
+void OldDescriptors::deactivate()
 {
   if ( !activated ) return;
   for (auto descriptor : descriptors) descriptor->deactivate();
 }
 
-CombinedImageSamplerDescriptor* Descriptors::add_combined_image_sampler(
+OldCombinedImageSamplerDescriptor* OldDescriptors::add_combined_image_sampler(
     uint32_t binding, VkShaderStageFlags stage, Image* image, Sampler* sampler )
 {
-  CombinedImageSamplerDescriptor* descriptor = new CombinedImageSamplerDescriptor(
+  OldCombinedImageSamplerDescriptor* descriptor = new OldCombinedImageSamplerDescriptor(
     this, binding, stage, image, sampler
   );
   descriptors.push_back( descriptor );
   return descriptor;
 }
 
-SampledImageDescriptor* Descriptors::add_sampled_image(
+OldSampledImageDescriptor* OldDescriptors::add_sampled_image(
     uint32_t binding, VkShaderStageFlags stage, Image* image )
 {
-  SampledImageDescriptor* descriptor = new SampledImageDescriptor(
+  OldSampledImageDescriptor* descriptor = new OldSampledImageDescriptor(
     this, binding, stage, image
   );
   descriptors.push_back( descriptor );
   return descriptor;
 }
 
-SamplerDescriptor* Descriptors::add_sampler(
+OldSamplerDescriptor* OldDescriptors::add_sampler(
     uint32_t binding, VkShaderStageFlags stage, Sampler* sampler )
 {
-  SamplerDescriptor* descriptor = new SamplerDescriptor( this, binding, stage, sampler );
+  OldSamplerDescriptor* descriptor = new OldSamplerDescriptor( this, binding, stage, sampler );
   descriptors.push_back( descriptor );
   return descriptor;
 }
 
-void Descriptors::cmd_bind( VkCommandBuffer cmd, GraphicsPipeline* pipeline )
+void OldDescriptors::cmd_bind( VkCommandBuffer cmd, GraphicsPipeline* pipeline )
 {
   update_modified_descriptor_sets();
   context->device_dispatch.cmdBindDescriptorSets( cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
       pipeline->layout, 0, 1, &sets[context->swap_index], 0, nullptr );
 }
 
-bool Descriptors::configure_descriptor_sets()
+bool OldDescriptors::configure_descriptor_sets()
 {
   uint32_t swapchain_count = context->swapchain_count;
   for (uint32_t swap_index=0; swap_index<swapchain_count; ++swap_index)
   {
-    for (Descriptor* descriptor : descriptors)
+    for (OldDescriptor* descriptor : descriptors)
     {
       if ( !descriptor->update_descriptor_set(swap_index, sets[swap_index]) ) return false;
     }
@@ -281,10 +281,10 @@ bool Descriptors::configure_descriptor_sets()
   return true;
 }
 
-bool Descriptors::update_modified_descriptor_sets()
+bool OldDescriptors::update_modified_descriptor_sets()
 {
   bool any_updated = false;
-  for (Descriptor* descriptor : descriptors)
+  for (OldDescriptor* descriptor : descriptors)
   {
     if (descriptor->update_descriptor_set_if_modified()) any_updated = true;
   }

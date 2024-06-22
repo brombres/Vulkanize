@@ -7,7 +7,7 @@ bool ConfigureDescriptors::on_activate()
   if ( !descriptors->activate(context) ) return false;
   progress = 1;
 
-  for (Descriptor* info : descriptors->descriptors)
+  for (OldDescriptor* info : descriptors->descriptors)
   {
     VkDescriptorSetLayoutBinding layout_binding = {};
     layout_binding.binding = info->binding;
@@ -19,7 +19,7 @@ bool ConfigureDescriptors::on_activate()
   }
   progress = 2;
 
-  // Descriptor Set Layout
+  // OldDescriptor Set Layout
   VkDescriptorSetLayoutCreateInfo layout_info = {};
   layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
   layout_info.bindingCount = (uint32_t)bindings.size();
@@ -32,9 +32,9 @@ bool ConfigureDescriptors::on_activate()
   );
   progress = 3;
 
-  // Descriptor Pool
+  // OldDescriptor Pool
   uint32_t swapchain_count = context->swapchain_count;
-  for (Descriptor* info : descriptors->descriptors)
+  for (OldDescriptor* info : descriptors->descriptors)
   {
     VkDescriptorPoolSize pool_size = {};
     pool_size.type = info->type;
@@ -55,7 +55,7 @@ bool ConfigureDescriptors::on_activate()
   );
   progress = 4;
 
-  // Descriptor Set
+  // OldDescriptor Set
   vector<VkDescriptorSetLayout> layouts( swapchain_count, descriptors->layout );
 
   VkDescriptorSetAllocateInfo allocate_info = {};

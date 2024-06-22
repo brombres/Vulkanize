@@ -5,7 +5,7 @@
 
 namespace VKZ
 {
-  struct Shader
+  struct Shader : RefCounted<Shader>
   {
     const int SOURCE = 1;
     const int SPIRV  = 2;
@@ -18,7 +18,6 @@ namespace VKZ
     std::string           shader_source;
     std::string           spirv_bytecode;
     int                   type;
-    int                   refcount = 0;
 
     Shader( Context* context, VkShaderStageFlagBits stage, std::string shader_filename,
         std::string shader_source, std::string main_function_name="main" )
@@ -42,7 +41,5 @@ namespace VKZ
     virtual void           destroy();
     virtual bool           get_create_info( VkPipelineShaderStageCreateInfo& info );
     virtual VkShaderModule get_module();
-    virtual void           release() { if ( !--refcount ) delete this; }
-    virtual Shader*        retain() { ++refcount; return this; }
   };
 };

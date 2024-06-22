@@ -7,11 +7,11 @@ namespace VKZ
 {
   struct ConfigureDescriptors : ContextOperation<Context>
   {
-    Descriptors* descriptors;
+    OldDescriptors* descriptors;
     std::vector<VkDescriptorSetLayoutBinding> bindings;
     std::vector<VkDescriptorPoolSize>         pool_sizes;
 
-    ConfigureDescriptors( Descriptors* descriptors ) : descriptors(descriptors) {}
+    ConfigureDescriptors( OldDescriptors* descriptors ) : descriptors(descriptors) {}
 
     // Override on_configure() and call descriptors->add_uniform_buffer() etc.
     // void on_configure() override;
