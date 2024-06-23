@@ -47,10 +47,11 @@ bool Sampler::create( SamplerInfo& info )
 {
   this->context = info.context;
 
+  error = false;
   VKZ_ATTEMPT(
     "creating sampler",
     context->device_dispatch.createSampler( &info.sampler_info, nullptr, &vk_sampler ),
-    return false
+    error = true; return false
   );
 
   exists = true;

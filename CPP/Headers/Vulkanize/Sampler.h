@@ -13,11 +13,12 @@ namespace VKZ
     SamplerInfo( Context* context );
   };
 
-  struct Sampler
+  struct Sampler : RefCounted
   {
     Context*   context;
     VkSampler  vk_sampler;
     bool       exists = false;
+    bool       error = false;
 
     Sampler() {}
     Sampler( SamplerInfo& info );

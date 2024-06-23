@@ -38,7 +38,7 @@ namespace VKZ
     );
   };
 
-  struct Image
+  struct Image : RefCounted
   {
     Context*       context;
     VkFormat       format;

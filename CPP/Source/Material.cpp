@@ -19,15 +19,9 @@ void Material::destroy()
   if (created)
   {
     created = false;
-    for (auto shader : shader_stages) shader->release();
-
     shader_stages.clear();
   }
 
-  for (auto description : vertex_descriptions)
-  {
-    delete description;
-  }
   vertex_descriptions.clear();
 }
 
@@ -47,9 +41,26 @@ void Material::add_shader_stage( VkShaderStageFlagBits stage, string shader_file
   );
 }
 
-CombinedImageSamplerDescriptor* Material::add_combined_image_sampler(
-    uint32_t binding, VkShaderStageFlags stage, Image* image, Sampler* sampler )
+Ref<CombinedImageSamplerDescriptor> Material::add_combined_image_sampler(
+    uint32_t binding, VkShaderStageFlags stage, size_t initial_count )
 {
+  CombinedImageSamplerDescriptor* descriptor = new CombinedImageSamplerDescriptor(
+    context, binding, stage, initial_count
+  );
+  descriptors.add( descriptor );
+  return descriptor;
+}
+
+Ref<CombinedImageSamplerDescriptor> Material::add_combined_image_sampler(
+    uint32_t binding, VkShaderStageFlags stage, Ref<Image> image, Ref<Sampler> sampler )
+{
+  if ( !sampler.exists() )
+  {
+    // Create default sampler
+    SamplerInfo sampler_info( context );
+    sampler = new Sampler( sampler_info );
+  }
+
   CombinedImageSamplerDescriptor* descriptor = new CombinedImageSamplerDescriptor(
     context, binding, stage, image, sampler
   );
@@ -57,12 +68,12 @@ CombinedImageSamplerDescriptor* Material::add_combined_image_sampler(
   return descriptor;
 }
 
-void Material::add_shader_stage( Shader* shader )
+void Material::add_shader_stage( Ref<Shader> shader )
 {
-  shader_stages.push_back( shader->retain() );
+  shader_stages.push_back( shader );
 }
 
-void Material::add_vertex_description( VertexDescription* vertex_description )
+void Material::add_vertex_description( Ref<VertexDescription> vertex_description )
 {
   vertex_descriptions.push_back( vertex_description );
 }

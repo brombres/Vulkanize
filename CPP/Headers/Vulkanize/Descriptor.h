@@ -65,7 +65,7 @@ namespace VKZ
     }
   };
 
-  struct Descriptor : RefCounted<Descriptor>
+  struct Descriptor : RefCounted
   {
     Context*           context;
     VkShaderStageFlags stage;
@@ -122,14 +122,57 @@ namespace VKZ
 
   struct CombinedImageSamplerDescriptor : ImageInfoDescriptor
   {
-    Image*    image;
-    Sampler*  sampler;
+    std::vector<Ref<Image>>    images;
+    std::vector<Ref<Sampler>>  samplers;
 
     CombinedImageSamplerDescriptor( Context* context, uint32_t binding, VkShaderStageFlags stage,
-        Image* image, Sampler* sampler )
-      : ImageInfoDescriptor( context, binding, stage, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER ),
-        image(image), sampler(sampler)
+        size_t initial_count )
+      : ImageInfoDescriptor( context, binding, stage, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER )
     {
+      images.resize( initial_count );
+      samplers.resize( initial_count );
+    }
+
+    CombinedImageSamplerDescriptor( Context* context, uint32_t binding, VkShaderStageFlags stage,
+        Ref<Image> image, Ref<Sampler> sampler )
+      : ImageInfoDescriptor( context, binding, stage, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER )
+    {
+      images.push_back( image );
+      samplers.push_back( sampler );
+    }
+
+    void add( Ref<Image> image, Ref<Sampler> sampler )
+    {
+      images.push_back( image );
+      samplers.push_back( sampler );
+    }
+
+    size_t count() { return images.size(); }
+
+    void set( size_t index, Ref<Image> image, Ref<Sampler> sampler )
+    {
+      if ( !_validate_index(index) ) return;
+      images[index] = image;
+      samplers[index] = sampler;
+    }
+
+    void set( size_t index, Ref<Image> image )
+    {
+      if ( !_validate_index(index) ) return;
+      images[index] = image;
+    }
+
+    void set( size_t index, Ref<Sampler> sampler )
+    {
+      if ( !_validate_index(index) ) return;
+      samplers[index] = sampler;
+    }
+
+    bool _validate_index( size_t index )
+    {
+      if (index < images.size()) return true;
+      VKZ_LOG_ERROR( "[Vulkanize] Error in CombinedImageSamplerDescriptor::set() - index out of bounds." );
+      return false;
     }
   };
 };

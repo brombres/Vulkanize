@@ -5,7 +5,7 @@
 
 namespace VKZ
 {
-  struct Shader : RefCounted<Shader>
+  struct Shader : RefCounted
   {
     const int SOURCE = 1;
     const int SPIRV  = 2;

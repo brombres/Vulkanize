@@ -18,7 +18,7 @@ namespace VKZ
 {
   // Extend 'CustomVertexDescription<CustomVertexType>' instead of extending
   // VertexDescription directly.
-  struct VertexDescription
+  struct VertexDescription : RefCounted
   {
     virtual ~VertexDescription() {}
 
