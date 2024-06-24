@@ -2,70 +2,52 @@
 using namespace std;
 using namespace VKZ;
 
-Shader::~Shader()
+Ref<ShaderStage> Shader::add_fragment_shader( string shader_filename, string shader_source,
+    string main_function_name )
 {
-  destroy();
+  return add_shader( VK_SHADER_STAGE_FRAGMENT_BIT, shader_filename, shader_source, main_function_name );
 }
 
-void Shader::destroy()
+Ref<ShaderStage> Shader::add_fragment_shader( string shader_filename, const char* spirv_bytecode,
+    size_t byte_count, string main_function_name )
 {
-  if (module != VK_NULL_HANDLE)
-  {
-    context->device_dispatch.destroyShaderModule( module, nullptr );
-    module = VK_NULL_HANDLE;
-  }
+  return add_shader( VK_SHADER_STAGE_FRAGMENT_BIT, shader_filename,
+      spirv_bytecode, byte_count, main_function_name );
 }
 
-bool Shader::get_create_info( VkPipelineShaderStageCreateInfo& info )
+Ref<ShaderStage> Shader::add_shader( VkShaderStageFlagBits stage, std::string shader_filename,
+    std::string shader_source, std::string main_function_name )
 {
-  memset( &info, 0, sizeof(VkPipelineShaderStageCreateInfo) );
-  info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  info.stage = stage;
-
-  info.module = get_module();
-  if (info.module == VK_NULL_HANDLE) return false;
-
-  info.pName = main_function_name.c_str();
-  return true;
+  Ref<ShaderStage> result =
+    new ShaderStage( context, stage, shader_filename, shader_source, main_function_name );
+  add_stage( result );
+  return result;
 }
 
-VkShaderModule Shader::get_module()
+Ref<ShaderStage> Shader::add_shader( VkShaderStageFlagBits stage, std::string shader_filename,
+    const char* spirv_bytecode, size_t byte_count, std::string main_function_name )
 {
-  if (module != VK_NULL_HANDLE) return module;
-
-  if (type == SOURCE)
-  {
-    #if VKZ_USE_GLSLANG
-      const char* shader_bytes;
-      size_t shader_size;
-      if (compile_shader(stage, shader_filename, shader_source, &shader_bytes, &shader_size))
-      {
-        type = SPIRV;
-        this->spirv_bytecode.assign( shader_bytes, shader_size );
-        delete shader_bytes;
-      }
-      else
-      {
-        return VK_NULL_HANDLE;
-      }
-    #else
-      #error "To dynamically compile .glsl shaders from source, integrate the GLSLang library and define VKZ_USE_GLSLANG as 1."
-    #endif
-  }
-
-  VkShaderModuleCreateInfo create_info = {};
-  create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-  create_info.codeSize = spirv_bytecode.size();
-  create_info.pCode = (const uint32_t*)spirv_bytecode.data();
-
-  string action = "creating shader module '";
-  action.append( shader_filename );
-  action.append( "'" );
-  VKZ_ATTEMPT(
-    action.c_str(),
-    context->device_dispatch.createShaderModule( &create_info, nullptr, &module ),
-    return VK_NULL_HANDLE;
-  );
-
-  return module;
+  Ref<ShaderStage> result =
+    new ShaderStage( context, stage, shader_filename, spirv_bytecode, byte_count, main_function_name );
+  add_stage( result );
+  return result;
 }
+
+void Shader::add_stage( Ref<ShaderStage> stage )
+{
+  stages.push_back( stage );
+}
+
+Ref<ShaderStage> Shader::add_vertex_shader( string shader_filename, string shader_source,
+    string main_function_name )
+{
+  return add_shader( VK_SHADER_STAGE_VERTEX_BIT, shader_filename, shader_source, main_function_name );
+}
+
+Ref<ShaderStage> Shader::add_vertex_shader( string shader_filename, const char* spirv_bytecode,
+    size_t byte_count, string main_function_name )
+{
+  return add_shader( VK_SHADER_STAGE_VERTEX_BIT, shader_filename,
+      spirv_bytecode, byte_count, main_function_name );
+}
+

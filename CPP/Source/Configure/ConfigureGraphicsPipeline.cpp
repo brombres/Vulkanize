@@ -152,14 +152,14 @@ bool ConfigureGraphicsPipeline::on_activate()
 void ConfigureGraphicsPipeline::add_shader_stage( VkShaderStageFlagBits stage,
     string shader_filename, string shader_source, const char* main_function_name )
 {
-  Shader* stage_info = new Shader( context, stage, shader_filename, shader_source, main_function_name );
+  ShaderStage* stage_info = new ShaderStage( context, stage, shader_filename, shader_source, main_function_name );
   shader_stages.push_back( stage_info );
 }
 
 void ConfigureGraphicsPipeline::add_shader_stage( VkShaderStageFlagBits stage, string shader_filename,
     const char* spirv_bytes, size_t spirv_byte_count, const char* main_function_name )
 {
-  Shader* stage_info = new Shader( context, stage, shader_filename, spirv_bytes,
+  ShaderStage* stage_info = new ShaderStage( context, stage, shader_filename, spirv_bytes,
       spirv_byte_count, main_function_name );
   shader_stages.push_back( stage_info );
 }

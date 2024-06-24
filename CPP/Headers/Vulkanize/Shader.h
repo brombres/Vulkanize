@@ -1,45 +1,34 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include "Vulkanize/Vulkanize.h"
 
 namespace VKZ
 {
   struct Shader : RefCounted
   {
-    const int SOURCE = 1;
-    const int SPIRV  = 2;
+    Context*                      context;
+    std::vector<Ref<ShaderStage>> stages;
 
-    Context*              context = nullptr;
-    VkShaderStageFlagBits stage;
-    VkShaderModule        module = VK_NULL_HANDLE;
-    std::string           main_function_name;
-    std::string           shader_filename;
-    std::string           shader_source;
-    std::string           spirv_bytecode;
-    int                   type;
+    Shader( Context* context ) : context(context) {}
+    virtual ~Shader() {}
 
-    Shader( Context* context, VkShaderStageFlagBits stage, std::string shader_filename,
-        std::string shader_source, std::string main_function_name="main" )
-      : context(context), stage(stage), shader_filename(shader_filename), shader_source(shader_source),
-        main_function_name(main_function_name)
-    {
-      type = SOURCE;
-    }
+    Ref<ShaderStage> add_fragment_shader( std::string shader_filename, std::string shader_source,
+        std::string main_function_name="main" );
+    Ref<ShaderStage> add_fragment_shader( std::string shader_filename, const char* spirv_bytecode,
+        size_t byte_count, std::string main_function_name="main" );
 
-    Shader( Context* context, VkShaderStageFlagBits stage, std::string shader_filename,
-        const char* spirv_bytecode, size_t byte_count,
-        std::string main_function_name="main" )
-      : context(context), stage(stage), shader_filename(shader_filename), main_function_name(main_function_name)
-    {
-      type = SPIRV;
-      this->spirv_bytecode.assign( spirv_bytecode, byte_count );
-    }
+    Ref<ShaderStage> add_shader( VkShaderStageFlagBits stage, std::string shader_filename,
+        std::string shader_source, std::string main_function_name="main" );
+    Ref<ShaderStage> add_shader( VkShaderStageFlagBits stage, std::string shader_filename,
+        const char* spirv_bytecode, size_t byte_count, std::string main_function_name="main" );
 
-    virtual ~Shader();
+    void add_stage( Ref<ShaderStage> stage );
 
-    virtual void           destroy();
-    virtual bool           get_create_info( VkPipelineShaderStageCreateInfo& info );
-    virtual VkShaderModule get_module();
+    Ref<ShaderStage> add_vertex_shader( std::string shader_filename, std::string shader_source,
+        std::string main_function_name="main" );
+    Ref<ShaderStage> add_vertex_shader( std::string shader_filename, const char* spirv_bytecode,
+        size_t byte_count, std::string main_function_name="main" );
   };
 };

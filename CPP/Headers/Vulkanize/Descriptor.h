@@ -13,6 +13,7 @@ namespace VKZ
     Context*            context;
     bool                configured = false;
     bool                is_ready = false;
+    int                 update_frames = -1;
 
     virtual ~UniformBufferData()
     {
@@ -53,15 +54,7 @@ namespace VKZ
     void set( DataType& value )
     {
       this->value = value;
-
-      if (is_ready)
-      {
-        for (auto& buffer : buffers)
-        {
-          buffer.copy_from( &value, sizeof(DataType) );
-        }
-        //update_frames = ((1 << context->swapchain_count) - 1);
-      }
+      update_frames = ((1 << context->swapchain_count) - 1);
     }
   };
 
@@ -72,6 +65,7 @@ namespace VKZ
     VkDescriptorType   type;
     uint32_t           count = 1;
     uint32_t           binding;
+    int                update_frames = -1;
     VkSampler*         immutable_samplers = nullptr;
 
     Descriptor( Context* context, uint32_t binding, VkShaderStageFlags stage, VkDescriptorType type )
@@ -81,6 +75,8 @@ namespace VKZ
 
     virtual bool configure() { return true; }
     virtual void destroy() {}
+
+    virtual void update_descriptor_set( VkDescriptorSet& set, size_t swap_index ) = 0;
   };
 
   template <typename DataType>
@@ -108,6 +104,35 @@ namespace VKZ
     {
       data->set( value );
     }
+
+    void update_descriptor_set( VkDescriptorSet& set, size_t swap_index ) override
+    {
+      int frame_bit = (1 << swap_index);
+      if ( !(data->update_frames & frame_bit) ) return;
+      data->update_frames &= ~frame_bit;
+
+      auto& buffer = data->buffers[swap_index];
+      if (data->is_ready)
+      {
+        buffer.copy_from( &data->value, sizeof(DataType) );
+      }
+
+      VkDescriptorBufferInfo buffer_info = {};
+      buffer_info.buffer = buffer.vk_buffer;
+      buffer_info.offset = 0;
+      buffer_info.range = sizeof(DataType);
+
+      VkWriteDescriptorSet write;
+      write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+      write.dstSet = set;
+      write.dstBinding = binding;
+      write.dstArrayElement = 0;
+      write.descriptorCount = 1;
+      write.descriptorType = type;
+      write.pBufferInfo = &buffer_info;
+
+      context->device_dispatch.updateDescriptorSets( 1, &write, 0, nullptr );
+    }
   };
 
   struct ImageInfoDescriptor : Descriptor
@@ -118,6 +143,8 @@ namespace VKZ
       : Descriptor( context, binding, stage, type )
     {
     }
+
+    void update_descriptor_set( VkDescriptorSet& set, size_t swap_index ) override;
   };
 
   struct CombinedImageSamplerDescriptor : ImageInfoDescriptor
@@ -126,53 +153,17 @@ namespace VKZ
     std::vector<Ref<Sampler>>  samplers;
 
     CombinedImageSamplerDescriptor( Context* context, uint32_t binding, VkShaderStageFlags stage,
-        size_t initial_count )
-      : ImageInfoDescriptor( context, binding, stage, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER )
-    {
-      images.resize( initial_count );
-      samplers.resize( initial_count );
-    }
+        size_t initial_count );
 
     CombinedImageSamplerDescriptor( Context* context, uint32_t binding, VkShaderStageFlags stage,
-        Ref<Image> image, Ref<Sampler> sampler )
-      : ImageInfoDescriptor( context, binding, stage, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER )
-    {
-      images.push_back( image );
-      samplers.push_back( sampler );
-    }
+        Ref<Image> image, Ref<Sampler> sampler );
 
-    void add( Ref<Image> image, Ref<Sampler> sampler )
-    {
-      images.push_back( image );
-      samplers.push_back( sampler );
-    }
+    virtual void add( Ref<Image> image, Ref<Sampler> sampler );
 
-    size_t count() { return images.size(); }
+    virtual void set( size_t index, Ref<Image> image, Ref<Sampler> sampler );
+    virtual void set( size_t index, Ref<Image> image );
+    virtual void set( size_t index, Ref<Sampler> sampler );
 
-    void set( size_t index, Ref<Image> image, Ref<Sampler> sampler )
-    {
-      if ( !_validate_index(index) ) return;
-      images[index] = image;
-      samplers[index] = sampler;
-    }
-
-    void set( size_t index, Ref<Image> image )
-    {
-      if ( !_validate_index(index) ) return;
-      images[index] = image;
-    }
-
-    void set( size_t index, Ref<Sampler> sampler )
-    {
-      if ( !_validate_index(index) ) return;
-      samplers[index] = sampler;
-    }
-
-    bool _validate_index( size_t index )
-    {
-      if (index < images.size()) return true;
-      VKZ_LOG_ERROR( "[Vulkanize] Error in CombinedImageSamplerDescriptor::set() - index out of bounds." );
-      return false;
-    }
+    virtual bool _validate_index( size_t index );
   };
 };
