@@ -9,6 +9,8 @@ bool DescriptorSet::create( Context* context )
 {
   if (construction_stage) return created;
 
+  this->context = context;
+
   bindings.clear();
   for (auto& descriptor : descriptors)
   {
@@ -75,6 +77,7 @@ bool DescriptorSet::create( Context* context )
   );
   construction_stage = 3;
 
+  created = true;
   return true;
 }
 
@@ -90,14 +93,14 @@ void DescriptorSet::destroy()
   construction_stage = 0;
 }
 
-void DescriptorSet::cmd_bind( VkCommandBuffer cmd, GraphicsPipeline& pipeline )
+void DescriptorSet::cmd_bind( VkCommandBuffer cmd, VkPipelineLayout pipeline_layout )
 {
   size_t swap_index = context->swap_index;
   VkDescriptorSet& set = swapchain_sets[swap_index];
   update_descriptors( set, swap_index );
 
   context->device_dispatch.cmdBindDescriptorSets( cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
-      pipeline.layout, 0, 1, &set, 0, nullptr );
+      pipeline_layout, 0, 1, &set, 0, nullptr );
 }
 
 void DescriptorSet::update_descriptors( VkDescriptorSet& set, size_t swap_index )

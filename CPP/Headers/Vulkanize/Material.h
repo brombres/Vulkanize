@@ -7,13 +7,13 @@ namespace VKZ
 {
   struct Material : RefCounted
   {
-    Context*                 context;
+    Context*         context;
+    Ref<Shader>      shader;
+    DescriptorSet    descriptors;
+    VkPipelineLayout pipeline_layout;
+    VkPipeline       graphics_pipeline;
+    bool             created = false;
     std::vector<Ref<VertexDescription>> vertex_descriptions;
-    Ref<Shader>              shader;
-    DescriptorSet            descriptors;
-    VkPipelineLayout         pipeline_layout;
-    VkPipeline               graphics_pipeline;
-    bool                     created = false;
 
     VkPrimitiveTopology                 topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     VkBool32                            primitive_restart_enabled = VK_FALSE;
