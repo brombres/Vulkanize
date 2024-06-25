@@ -120,6 +120,7 @@ namespace VKZ
 #include "Vulkanize/Configure/ConfigureTextureSampler.h"
 #include "Vulkanize/Render/RenderBegin.h"
 #include "Vulkanize/Render/RenderEnd.h"
+#include "Vulkanize/UniformBufferData.h"
 #include "Vulkanize/Descriptor.h"
 #include "Vulkanize/DescriptorSet.h"
 #include "Vulkanize/Material.h"

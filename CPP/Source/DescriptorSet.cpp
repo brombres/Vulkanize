@@ -97,13 +97,13 @@ void DescriptorSet::cmd_bind( VkCommandBuffer cmd, VkPipelineLayout pipeline_lay
 {
   size_t swap_index = context->swap_index;
   VkDescriptorSet& set = swapchain_sets[swap_index];
-  update_descriptors( set, swap_index );
+  update_descriptor_set( set, swap_index );
 
   context->device_dispatch.cmdBindDescriptorSets( cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
       pipeline_layout, 0, 1, &set, 0, nullptr );
 }
 
-void DescriptorSet::update_descriptors( VkDescriptorSet& set, size_t swap_index )
+void DescriptorSet::update_descriptor_set( VkDescriptorSet& set, size_t swap_index )
 {
   for (auto& descriptor : descriptors)
   {

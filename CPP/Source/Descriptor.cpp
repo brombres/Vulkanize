@@ -53,6 +53,8 @@ CombinedImageSamplerDescriptor::CombinedImageSamplerDescriptor( Context* context
 
 void CombinedImageSamplerDescriptor::add( Ref<Image> image, Ref<Sampler> sampler )
 {
+  if ( !sampler.exists() ) sampler = Sampler::create_default( context );
+
   images.push_back( image );
   samplers.push_back( sampler );
 
@@ -69,6 +71,9 @@ void CombinedImageSamplerDescriptor::add( Ref<Image> image, Ref<Sampler> sampler
 void CombinedImageSamplerDescriptor::set( size_t index, Ref<Image> image, Ref<Sampler> sampler )
 {
   if ( !_validate_index(index) ) return;
+
+  if ( !sampler.exists() ) sampler = Sampler::create_default( context );
+
   images[index] = image;
   samplers[index] = sampler;
   if (image.exists())   image_infos[index].imageView = image->vk_view;
@@ -76,7 +81,7 @@ void CombinedImageSamplerDescriptor::set( size_t index, Ref<Image> image, Ref<Sa
   update_frames = ((1 << context->swapchain_count) - 1);
 }
 
-void CombinedImageSamplerDescriptor::set( size_t index, Ref<Image> image )
+void CombinedImageSamplerDescriptor::set_image( size_t index, Ref<Image> image )
 {
   if ( !_validate_index(index) ) return;
   images[index] = image;
@@ -84,7 +89,7 @@ void CombinedImageSamplerDescriptor::set( size_t index, Ref<Image> image )
   update_frames = ((1 << context->swapchain_count) - 1);
 }
 
-void CombinedImageSamplerDescriptor::set( size_t index, Ref<Sampler> sampler )
+void CombinedImageSamplerDescriptor::set_sampler( size_t index, Ref<Sampler> sampler )
 {
   if ( !_validate_index(index) ) return;
   samplers[index] = sampler;

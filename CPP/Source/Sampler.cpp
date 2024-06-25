@@ -33,6 +33,12 @@ SamplerInfo::SamplerInfo( Context* context ) : context(context)
 //==============================================================================
 // Sampler
 //==============================================================================
+Ref<Sampler> Sampler::create_default( Context* context )
+{
+  SamplerInfo info( context );
+  return new Sampler( info );
+}
+
 Sampler::Sampler( SamplerInfo& info )
 {
   create( info );

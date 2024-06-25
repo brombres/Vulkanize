@@ -15,6 +15,8 @@ namespace VKZ
 
   struct Sampler : RefCounted
   {
+    static Ref<Sampler> create_default( Context* context );
+
     Context*   context;
     VkSampler  vk_sampler;
     bool       exists = false;

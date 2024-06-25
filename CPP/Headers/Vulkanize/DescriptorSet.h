@@ -22,6 +22,6 @@ namespace VKZ
 
     void add( Descriptor* descriptor ) { descriptors.push_back(descriptor); }
     void cmd_bind( VkCommandBuffer cmd, VkPipelineLayout pipeline_layout );
-    void update_descriptors( VkDescriptorSet& set, size_t swap_index );
+    void update_descriptor_set( VkDescriptorSet& set, size_t swap_index );
   };
 };

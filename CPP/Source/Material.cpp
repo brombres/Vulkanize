@@ -46,13 +46,6 @@ Ref<CombinedImageSamplerDescriptor> Material::add_combined_image_sampler(
 Ref<CombinedImageSamplerDescriptor> Material::add_combined_image_sampler(
     uint32_t binding, Ref<Image> image, Ref<Sampler> sampler )
 {
-  if ( !sampler.exists() )
-  {
-    // Create default sampler
-    SamplerInfo sampler_info( context );
-    sampler = new Sampler( sampler_info );
-  }
-
   CombinedImageSamplerDescriptor* descriptor = new CombinedImageSamplerDescriptor(
     context, binding, VK_SHADER_STAGE_FRAGMENT_BIT, image, sampler
   );
