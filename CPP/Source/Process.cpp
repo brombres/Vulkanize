@@ -46,7 +46,7 @@ bool Process::configure()
 {
   if (configured) return true;
   if ( !operations.size() ) configure_operations();
-  if ( !activate("configure") ) return false;
+  if ( !activate() ) return false;
   configured = true;
   return true;
 }
@@ -62,7 +62,7 @@ void Process::deactivate( string phase )
 
 void Process::destroy()
 {
-  deactivate( "configure" );
+  deactivate();
   configured = false;
 }
 
@@ -117,8 +117,10 @@ void Process::set_operation( string phase, Operation* operation )
 
 bool Process::_phase_begins_with( const string& phase, const string& other )
 {
-  auto value_n = phase.size();
   auto n = other.size();
+  if ( !n ) return true;  // everything begins with empty string
+
+  auto value_n = phase.size();
   if (value_n < n) return false;
 
   if (0 != phase.compare(0,n,other)) return false;

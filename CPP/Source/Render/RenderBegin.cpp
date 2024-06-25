@@ -32,8 +32,8 @@ bool RenderBegin::on_execute()
   context->device_dispatch.waitForFences( 1, &context->fences[context->swap_index], VK_FALSE, UINT64_MAX );
   context->device_dispatch.resetFences( 1, &context->fences[context->swap_index] );
 
-  context->staging_buffer = &context->staging_buffers[ context->swap_index ];
-  context->vertex_buffer  = &context->vertex_buffers[ context->swap_index ];
+  //context->staging_buffer = &context->staging_buffers[ context->swap_index ];
+  //context->vertex_buffer  = &context->vertex_buffers[ context->swap_index ];
 
   context->cmd = context->command_buffers[ context->swap_index ];
   context->reset_cmd( context->cmd );

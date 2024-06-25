@@ -39,11 +39,7 @@ namespace VKZ
     VkRenderPass render_pass;
 
     VkCommandPool                command_pool;
-    std::vector<Buffer>          vertex_buffers;
-    std::vector<Buffer>          staging_buffers;
     std::vector<VkCommandBuffer> command_buffers;
-    Buffer*                      vertex_buffer;
-    Buffer*                      staging_buffer;
     VkCommandBuffer              cmd;
 
     std::vector<VkSemaphore> image_available_semaphores;

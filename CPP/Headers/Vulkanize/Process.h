@@ -24,12 +24,12 @@ namespace VKZ
     virtual ~Process();
 
     virtual void add_operation( std::string phase, Operation* operation );
-    virtual bool activate( const std::string phase );
+    virtual bool activate( const std::string phase="" );
     virtual bool configure();
 
     virtual void configure_operations();
 
-    virtual void deactivate( const std::string phase );
+    virtual void deactivate( const std::string phase="" );
     virtual void destroy();
     virtual bool dispatch_event( std::string phase, Event event );
     virtual bool execute( std::string phase );
