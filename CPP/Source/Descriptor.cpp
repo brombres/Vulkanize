@@ -11,9 +11,9 @@ using namespace VKZ;
 //==============================================================================
 void ImageInfoDescriptor::update_descriptor_set( VkDescriptorSet& set, size_t swap_index )
 {
-  int frame_bit = (1 << swap_index);
-  if ( !(update_frames & frame_bit) ) return;
-  update_frames &= ~frame_bit;
+  //int frame_bit = (1 << swap_index);
+  //if ( !(update_frames & frame_bit) ) return;
+  //update_frames &= ~frame_bit;
 
   VkWriteDescriptorSet write;
   write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -46,6 +46,7 @@ CombinedImageSamplerDescriptor::CombinedImageSamplerDescriptor( Context* context
   images.push_back( image );
   samplers.push_back( sampler );
   count = (uint32_t)images.size();
+  update_frames = ((1 << context->swapchain_count) - 1);
 }
 
 void CombinedImageSamplerDescriptor::add( Ref<Image> image, Ref<Sampler> sampler )
@@ -53,6 +54,7 @@ void CombinedImageSamplerDescriptor::add( Ref<Image> image, Ref<Sampler> sampler
   images.push_back( image );
   samplers.push_back( sampler );
   count = (uint32_t)images.size();
+  update_frames = ((1 << context->swapchain_count) - 1);
 }
 
 void CombinedImageSamplerDescriptor::set( size_t index, Ref<Image> image, Ref<Sampler> sampler )
