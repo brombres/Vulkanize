@@ -60,6 +60,45 @@ Ref<CombinedImageSamplerDescriptor> Material::add_combined_image_sampler(
   return descriptor;
 }
 
+Ref<SampledImageDescriptor> Material::add_sampled_image(
+    uint32_t binding, size_t initial_count )
+{
+  SampledImageDescriptor* descriptor = new SampledImageDescriptor(
+    context, binding, VK_SHADER_STAGE_FRAGMENT_BIT, initial_count
+  );
+  descriptors.add( descriptor );
+  return descriptor;
+}
+
+Ref<SampledImageDescriptor> Material::add_sampled_image( uint32_t binding, Ref<Image> image )
+{
+  SampledImageDescriptor* descriptor = new SampledImageDescriptor(
+    context, binding, VK_SHADER_STAGE_FRAGMENT_BIT, image
+  );
+  descriptors.add( descriptor );
+  return descriptor;
+}
+
+Ref<SamplerDescriptor> Material::add_sampler(
+    uint32_t binding, size_t initial_count )
+{
+  SamplerDescriptor* descriptor = new SamplerDescriptor(
+    context, binding, VK_SHADER_STAGE_FRAGMENT_BIT, initial_count
+  );
+  descriptors.add( descriptor );
+  return descriptor;
+}
+
+Ref<SamplerDescriptor> Material::add_sampler(
+    uint32_t binding, Ref<Sampler> sampler )
+{
+  SamplerDescriptor* descriptor = new SamplerDescriptor(
+    context, binding, VK_SHADER_STAGE_FRAGMENT_BIT, sampler
+  );
+  descriptors.add( descriptor );
+  return descriptor;
+}
+
 void Material::add_vertex_description( Ref<VertexDescription> vertex_description )
 {
   vertex_descriptions.push_back( vertex_description );

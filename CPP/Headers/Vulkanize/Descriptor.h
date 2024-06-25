@@ -140,9 +140,7 @@ namespace VKZ
     std::vector<VkDescriptorImageInfo> image_infos;
 
     ImageInfoDescriptor( Context* context, uint32_t binding, VkShaderStageFlags stage, VkDescriptorType type )
-      : Descriptor( context, binding, stage, type )
-    {
-    }
+      : Descriptor( context, binding, stage, type ) {}
 
     void update_descriptor_set( VkDescriptorSet& set, size_t swap_index ) override;
   };
@@ -165,5 +163,33 @@ namespace VKZ
     virtual void set( size_t index, Ref<Sampler> sampler );
 
     virtual bool _validate_index( size_t index );
+  };
+
+  struct SampledImageDescriptor : ImageInfoDescriptor
+  {
+    std::vector<Ref<Image>>    images;
+
+    SampledImageDescriptor( Context* context, uint32_t binding, VkShaderStageFlags stage,
+        size_t initial_count );
+
+    SampledImageDescriptor( Context* context, uint32_t binding, VkShaderStageFlags stage,
+        Ref<Image> image );
+
+    virtual void add( Ref<Image> image );
+    virtual void set( size_t index, Ref<Image> image );
+  };
+
+  struct SamplerDescriptor : ImageInfoDescriptor
+  {
+    std::vector<Ref<Sampler>>  samplers;
+
+    SamplerDescriptor( Context* context, uint32_t binding, VkShaderStageFlags stage,
+        size_t initial_count );
+
+    SamplerDescriptor( Context* context, uint32_t binding, VkShaderStageFlags stage,
+        Ref<Sampler> sampler );
+
+    virtual void add( Ref<Sampler> sampler );
+    virtual void set( size_t index, Ref<Sampler> sampler );
   };
 };

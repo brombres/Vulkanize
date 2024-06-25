@@ -34,6 +34,16 @@ namespace VKZ
     virtual Ref<CombinedImageSamplerDescriptor>
       add_combined_image_sampler( uint32_t binding, Ref<Image> image, Ref<Sampler> sampler=Ref<Sampler>() );
 
+    virtual Ref<SampledImageDescriptor>
+      add_sampled_image( uint32_t binding, size_t initial_count=0 );
+    virtual Ref<SampledImageDescriptor>
+      add_sampled_image( uint32_t binding, Ref<Image> image );
+
+    virtual Ref<SamplerDescriptor>
+      add_sampler( uint32_t binding, size_t initial_count=0 );
+    virtual Ref<SamplerDescriptor>
+      add_sampler( uint32_t binding, Ref<Sampler> sampler );
+
     virtual void add_vertex_description( Ref<VertexDescription> vertex_description );
 
     virtual void enable_primitive_restart( VkBool32 setting ) { primitive_restart_enabled = setting; }
