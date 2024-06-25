@@ -137,7 +137,7 @@ namespace VKZ
 
   struct ImageInfoDescriptor : Descriptor
   {
-    VkDescriptorImageInfo image_info = {};
+    std::vector<VkDescriptorImageInfo> image_infos;
 
     ImageInfoDescriptor( Context* context, uint32_t binding, VkShaderStageFlags stage, VkDescriptorType type )
       : Descriptor( context, binding, stage, type )
