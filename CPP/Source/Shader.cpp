@@ -2,12 +2,12 @@
 using namespace std;
 using namespace VKZ;
 
-ShaderStage::~ShaderStage()
+Shader::~Shader()
 {
   destroy();
 }
 
-void ShaderStage::destroy()
+void Shader::destroy()
 {
   if (module != VK_NULL_HANDLE)
   {
@@ -16,7 +16,7 @@ void ShaderStage::destroy()
   }
 }
 
-bool ShaderStage::get_create_info( VkPipelineShaderStageCreateInfo& info )
+bool Shader::get_create_info( VkPipelineShaderStageCreateInfo& info )
 {
   memset( &info, 0, sizeof(VkPipelineShaderStageCreateInfo) );
   info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -29,7 +29,7 @@ bool ShaderStage::get_create_info( VkPipelineShaderStageCreateInfo& info )
   return true;
 }
 
-VkShaderModule ShaderStage::get_module()
+VkShaderModule Shader::get_module()
 {
   if (module != VK_NULL_HANDLE) return module;
 

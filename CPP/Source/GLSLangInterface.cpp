@@ -92,7 +92,7 @@ bool VKZ::compile_shader( VkShaderStageFlagBits stage, const std::string& filena
   glslang_program_SPIRV_get( program, (uint32_t*)*bytecode );
 
   const char* spirv_messages = glslang_program_SPIRV_get_messages(program);
-  if (spirv_messages) printf("[Vulkanize] ShaderStage compilation: (%s) %s\b", filename.c_str(), spirv_messages);
+  if (spirv_messages) printf("[Vulkanize] Shader compilation: (%s) %s\b", filename.c_str(), spirv_messages);
 
   glslang_program_delete( program );
   glslang_shader_delete( shader );

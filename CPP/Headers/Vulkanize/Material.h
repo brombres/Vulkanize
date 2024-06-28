@@ -12,7 +12,7 @@ namespace VKZ
     DescriptorSet    descriptors;
     VkPipelineLayout pipeline_layout;
     VkPipeline       pipeline;
-    std::vector<Ref<ShaderStage>>            shader_stages;
+    std::vector<Ref<Shader>>            shader_stages;
     std::vector<Ref<VertexDescription>> vertex_descriptions;
 
     bool created = false;
@@ -69,21 +69,21 @@ namespace VKZ
     //--------------------------------------------------------------------------
     // Shaders
     //--------------------------------------------------------------------------
-    Ref<ShaderStage> add_fragment_shader( std::string shader_filename, std::string shader_source,
+    Ref<Shader> add_fragment_shader( std::string shader_filename, std::string shader_source,
         std::string main_function_name="main" );
-    Ref<ShaderStage> add_fragment_shader( std::string shader_filename, const char* spirv_bytecode,
+    Ref<Shader> add_fragment_shader( std::string shader_filename, const char* spirv_bytecode,
         size_t byte_count, std::string main_function_name="main" );
 
-    void add_shader( Ref<ShaderStage> shader ) { shader_stages.push_back(shader); }
+    void add_shader( Ref<Shader> shader ) { shader_stages.push_back(shader); }
 
-    Ref<ShaderStage> add_shader( VkShaderStageFlagBits stage, std::string shader_filename,
+    Ref<Shader> add_shader( VkShaderStageFlagBits stage, std::string shader_filename,
         std::string shader_source, std::string main_function_name="main" );
-    Ref<ShaderStage> add_shader( VkShaderStageFlagBits stage, std::string shader_filename,
+    Ref<Shader> add_shader( VkShaderStageFlagBits stage, std::string shader_filename,
         const char* spirv_bytecode, size_t byte_count, std::string main_function_name="main" );
 
-    Ref<ShaderStage> add_vertex_shader( std::string shader_filename, std::string shader_source,
+    Ref<Shader> add_vertex_shader( std::string shader_filename, std::string shader_source,
         std::string main_function_name="main" );
-    Ref<ShaderStage> add_vertex_shader( std::string shader_filename, const char* spirv_bytecode,
+    Ref<Shader> add_vertex_shader( std::string shader_filename, const char* spirv_bytecode,
         size_t byte_count, std::string main_function_name="main" );
 
     //--------------------------------------------------------------------------
