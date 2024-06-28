@@ -28,11 +28,14 @@ void Material::destroy()
   }
   pipeline_construction_stage = 0;
 
-  shader = nullptr;
+  shader_stages.clear();
   vertex_descriptions.clear();
   created = false;
 }
 
+//------------------------------------------------------------------------------
+// Descriptors
+//------------------------------------------------------------------------------
 Ref<CombinedImageSamplerDescriptor> Material::add_combined_image_sampler(
     uint32_t binding, size_t initial_count )
 {
@@ -90,6 +93,53 @@ Ref<SamplerDescriptor> Material::add_sampler(
   );
   descriptors.add( descriptor );
   return descriptor;
+}
+
+//------------------------------------------------------------------------------
+// Shaders
+//------------------------------------------------------------------------------
+Ref<ShaderStage> Material::add_fragment_shader( string shader_filename, string shader_source,
+    string main_function_name )
+{
+  return add_shader( VK_SHADER_STAGE_FRAGMENT_BIT, shader_filename, shader_source, main_function_name );
+}
+
+Ref<ShaderStage> Material::add_fragment_shader( string shader_filename, const char* spirv_bytecode,
+    size_t byte_count, string main_function_name )
+{
+  return add_shader( VK_SHADER_STAGE_FRAGMENT_BIT, shader_filename,
+      spirv_bytecode, byte_count, main_function_name );
+}
+
+Ref<ShaderStage> Material::add_shader( VkShaderStageFlagBits stage, std::string shader_filename,
+    std::string shader_source, std::string main_function_name )
+{
+  Ref<ShaderStage> result =
+    new ShaderStage( context, stage, shader_filename, shader_source, main_function_name );
+  shader_stages.push_back( result );
+  return result;
+}
+
+Ref<ShaderStage> Material::add_shader( VkShaderStageFlagBits stage, std::string shader_filename,
+    const char* spirv_bytecode, size_t byte_count, std::string main_function_name )
+{
+  Ref<ShaderStage> result =
+    new ShaderStage( context, stage, shader_filename, spirv_bytecode, byte_count, main_function_name );
+  shader_stages.push_back( result );
+  return result;
+}
+
+Ref<ShaderStage> Material::add_vertex_shader( string shader_filename, string shader_source,
+    string main_function_name )
+{
+  return add_shader( VK_SHADER_STAGE_VERTEX_BIT, shader_filename, shader_source, main_function_name );
+}
+
+Ref<ShaderStage> Material::add_vertex_shader( string shader_filename, const char* spirv_bytecode,
+    size_t byte_count, string main_function_name )
+{
+  return add_shader( VK_SHADER_STAGE_VERTEX_BIT, shader_filename,
+      spirv_bytecode, byte_count, main_function_name );
 }
 
 void Material::add_vertex_description( Ref<VertexDescription> vertex_description )
@@ -167,13 +217,12 @@ bool Material::_create_graphics_pipeline()
 {
   // Collect VkPipelineShaderStageCreateInfo from shader stages
   vector<VkPipelineShaderStageCreateInfo> shader_create_info;
-  if (shader.exists())
+  if (shader_stages.size())
   {
-    auto& stages = shader->stages;
-    shader_create_info.resize( stages.size() );
-    for (size_t i=0; i<stages.size(); ++i)
+    shader_create_info.resize( shader_stages.size() );
+    for (size_t i=0; i<shader_stages.size(); ++i)
     {
-      if ( !stages[i]->get_create_info( shader_create_info[i] ) ) return false;
+      if ( !shader_stages[i]->get_create_info( shader_create_info[i] ) ) return false;
     }
   }
 

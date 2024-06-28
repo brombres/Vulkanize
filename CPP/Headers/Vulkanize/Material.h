@@ -9,10 +9,10 @@ namespace VKZ
   {
     // PROPERTIES
     Context*         context;
-    Ref<Shader>      shader;
     DescriptorSet    descriptors;
     VkPipelineLayout pipeline_layout;
     VkPipeline       pipeline;
+    std::vector<Ref<ShaderStage>>            shader_stages;
     std::vector<Ref<VertexDescription>> vertex_descriptions;
 
     bool created = false;
@@ -48,6 +48,9 @@ namespace VKZ
                                float min_depth=0, float max_depth=1.0f );
 
     // CONFIGURATION INTERFACE
+    //--------------------------------------------------------------------------
+    // Descriptors
+    //--------------------------------------------------------------------------
     virtual Ref<CombinedImageSamplerDescriptor>
       add_combined_image_sampler( uint32_t binding, size_t initial_count=0 );
     virtual Ref<CombinedImageSamplerDescriptor>
@@ -63,9 +66,31 @@ namespace VKZ
     virtual Ref<SamplerDescriptor>
       add_sampler( uint32_t binding, Ref<Sampler> sampler );
 
+    //--------------------------------------------------------------------------
+    // Shaders
+    //--------------------------------------------------------------------------
+    Ref<ShaderStage> add_fragment_shader( std::string shader_filename, std::string shader_source,
+        std::string main_function_name="main" );
+    Ref<ShaderStage> add_fragment_shader( std::string shader_filename, const char* spirv_bytecode,
+        size_t byte_count, std::string main_function_name="main" );
+
+    void add_shader( Ref<ShaderStage> shader ) { shader_stages.push_back(shader); }
+
+    Ref<ShaderStage> add_shader( VkShaderStageFlagBits stage, std::string shader_filename,
+        std::string shader_source, std::string main_function_name="main" );
+    Ref<ShaderStage> add_shader( VkShaderStageFlagBits stage, std::string shader_filename,
+        const char* spirv_bytecode, size_t byte_count, std::string main_function_name="main" );
+
+    Ref<ShaderStage> add_vertex_shader( std::string shader_filename, std::string shader_source,
+        std::string main_function_name="main" );
+    Ref<ShaderStage> add_vertex_shader( std::string shader_filename, const char* spirv_bytecode,
+        size_t byte_count, std::string main_function_name="main" );
+
+    //--------------------------------------------------------------------------
+    // Miscelleneous
+    //--------------------------------------------------------------------------
     virtual void add_vertex_description( Ref<VertexDescription> vertex_description );
     virtual void enable_primitive_restart( VkBool32 setting ) { primitive_restart_enabled = setting; }
-    virtual void set_shader( Ref<Shader> shader ) { this->shader = shader; }
     virtual void set_topology( VkPrimitiveTopology topology ) { this->topology = topology; }
 
     // Internal configuration - override as needed

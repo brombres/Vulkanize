@@ -90,7 +90,6 @@ namespace VKZ
 #include "Vulkanize/RefCounted.h"
 #include "Vulkanize/Buffer.h"
 #include "Vulkanize/ShaderStage.h"
-#include "Vulkanize/Shader.h"
 #include "Vulkanize/Image.h"
 #include "Vulkanize/VertexDescription.h"
 #include "Vulkanize/CustomVertexDescription.h"
